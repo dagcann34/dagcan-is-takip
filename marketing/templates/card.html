@@ -1,0 +1,128 @@
+<!doctype html>
+<!--
+  Sosyal medya kart şablonu. Parametreler: ?lang=tr|en&format=x|li|sq&shot=board|overview|ai
+  x  = X/Twitter 1600x900 (16:9)  ·  li = LinkedIn 1200x627  ·  sq = LinkedIn/Instagram 1080x1080
+  Render: marketing/render.sh
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../node_modules/@fontsource-variable/inter/index.css" />
+<style>
+  :root {
+    --bg: #0A0F1C; --navy: #172B4D; --brand: #0052CC; --cyan: #00B8D9; --ink: #E6EDF7; --muted: #9FADBC;
+    --green: #36B37E; --line: rgb(255 255 255 / .1);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: var(--w); height: var(--h); overflow: hidden; }
+  body {
+    font-family: "Inter Variable", system-ui, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(900px 600px at 0% 0%, rgb(0 82 204 / .35), transparent 60%),
+      radial-gradient(800px 600px at 100% 100%, rgb(0 184 217 / .22), transparent 60%),
+      var(--bg);
+    position: relative;
+  }
+  .grid-bg { position: absolute; inset: 0; background-image: radial-gradient(rgb(255 255 255 / .06) 1px, transparent 1px); background-size: 28px 28px; }
+  .wrap { position: relative; height: 100%; display: grid; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand img { width: 56px; height: 56px; }
+  .brand b { font-size: 26px; letter-spacing: -.01em; }
+  .brand span { display: block; font-size: 15px; color: var(--muted); font-weight: 500; }
+  h1 { font-weight: 750; letter-spacing: -.03em; line-height: 1.04; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, #4C9AFF, var(--cyan)); -webkit-background-clip: text; color: transparent; }
+  .sub { color: var(--muted); line-height: 1.4; }
+  ul { list-style: none; padding: 0; display: grid; }
+  li { display: flex; gap: 12px; align-items: flex-start; line-height: 1.3; }
+  li i { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; font-style: normal; font-size: 14px;
+         background: rgb(0 184 217 / .14); border: 1px solid rgb(0 184 217 / .35); }
+  .pills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pill { border: 1px solid var(--line); background: rgb(255 255 255 / .05); border-radius: 999px; padding: 8px 16px; font-size: 16px; font-weight: 600; }
+  .pill.free { background: rgb(54 179 126 / .16); border-color: rgb(54 179 126 / .45); color: #7EE2B8; }
+  .url { font-size: 17px; color: var(--muted); font-weight: 500; }
+  .shot { border-radius: 18px; overflow: hidden; border: 1px solid rgb(255 255 255 / .14);
+          box-shadow: 0 40px 120px rgb(0 0 0 / .6), 0 0 0 8px rgb(23 43 77 / .45); background: var(--bg); }
+  .shot img { display: block; width: 100%; }
+
+  /* X 1600x900 & LinkedIn 1200x627: metin solda, ekran görüntüsü sağda taşarak */
+  .wide .wrap { grid-template-columns: 46% 54%; }
+  .wide .left { display: flex; flex-direction: column; justify-content: center; gap: 26px; padding: 0 0 0 var(--pad); }
+  .wide .right { position: relative; }
+  .wide .shot { position: absolute; top: 50%; left: 40px; width: 150%; transform: translateY(-50%) perspective(2000px) rotateY(-9deg) rotateX(3deg); transform-origin: left center; }
+
+  .x { --w: 1600px; --h: 900px; --pad: 90px; }
+  .x h1 { font-size: 68px; } .x .sub { font-size: 24px; } .x ul { gap: 14px; } .x li { font-size: 21px; }
+
+  .li { --w: 1200px; --h: 627px; --pad: 64px; }
+  .li .left { gap: 18px !important; }
+  .li h1 { font-size: 50px; } .li .sub { font-size: 19px; } .li ul { gap: 10px; } .li li { font-size: 17px; }
+  .li .brand img { width: 44px; height: 44px; } .li .brand b { font-size: 21px; } .li .pill { font-size: 14px; padding: 6px 13px; }
+  .li .url { font-size: 15px; }
+
+  /* Kare 1080x1080: üstte metin, altta ekran görüntüsü */
+  .sq { --w: 1080px; --h: 1080px; }
+  .sq .wrap { grid-template-rows: auto 1fr; padding: 72px 72px 0; gap: 36px; }
+  .sq .left { display: flex; flex-direction: column; gap: 22px; }
+  .sq h1 { font-size: 64px; } .sq .sub { font-size: 22px; }
+  .sq ul { grid-template-columns: 1fr 1fr; gap: 14px 24px; } .sq li { font-size: 19px; }
+  .sq .right { position: relative; }
+  .sq .shot { position: absolute; left: 0; width: 140%; top: 0; }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="wrap">
+  <div class="left">
+    <div class="brand"><img src="../../public/favicon.svg" alt="" /><div><b>Dağcan İş Takip</b><span id="tagline"></span></div></div>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <ul id="features"></ul>
+    <div class="pills" id="pills"></div>
+    <div class="url">github.com/dagcann34/dagcan-is-takip</div>
+  </div>
+  <div class="right"><div class="shot"><img id="shot" alt="" /></div></div>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const lang = q.get('lang') === 'en' ? 'en' : 'tr';
+  const format = q.get('format') || 'x';
+  const shot = q.get('shot') || 'board';
+  document.body.className = (format === 'sq' ? '' : 'wide ') + format;
+  document.documentElement.lang = lang;
+
+  const copy = {
+    tr: {
+      tagline: 'Task & Security Hub',
+      title: 'İşlerin, şifrelerin ve raporların <em>tek uygulamada.</em>',
+      sub: 'BT altyapı ekipleri için Kanban pano, sıfır bilgi şifreli kasa ve AI raporlama.',
+      features: [
+        ['▦', 'Kanban + beyaz tahta, PNG / SVG / PDF dışa aktarma'],
+        ['🔒', 'Argon2id + AES-256-GCM şifreli kasa, otomatik kilit'],
+        ['✦', 'AI ile yönetici e-postası, CV (STAR), RFC ve olay raporu'],
+        ['⌘', 'Komut paleti, süre takibi, tepsi ve hızlı görev'],
+      ],
+      pills: ['Ücretsiz & açık kaynak', 'Windows', 'macOS', 'TR / EN'],
+    },
+    en: {
+      tagline: 'Task & Security Hub',
+      title: 'Your tasks, secrets and reports <em>in one app.</em>',
+      sub: 'Kanban board, zero-knowledge vault and AI reporting for IT infrastructure teams.',
+      features: [
+        ['▦', 'Kanban + whiteboard with PNG / SVG / PDF export'],
+        ['🔒', 'Argon2id + AES-256-GCM encrypted vault with auto-lock'],
+        ['✦', 'AI executive emails, STAR CV bullets, RFCs and postmortems'],
+        ['⌘', 'Command palette, time tracking, tray and quick capture'],
+      ],
+      pills: ['Free & open source', 'Windows', 'macOS', 'EN / TR'],
+    },
+  }[lang];
+
+  document.getElementById('tagline').textContent = copy.tagline;
+  document.getElementById('title').innerHTML = copy.title;
+  document.getElementById('sub').textContent = copy.sub;
+  document.getElementById('features').innerHTML = copy.features.map(([i, t]) => `<li><i>${i}</i><span>${t}</span></li>`).join('');
+  document.getElementById('pills').innerHTML = copy.pills.map((p, i) => `<span class="pill ${i === 0 ? 'free' : ''}">${p}</span>`).join('');
+  document.getElementById('shot').src = `../../docs/screenshots/${shot}-${lang}.png`;
+</script>
+</body>
+</html>

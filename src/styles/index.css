@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/*
+ * Dağcan İş Takip — Tasarım token'ları
+ * Jira Service Management + ServiceNow ITSM + Apple Enterprise hibriti.
+ * Deep Obsidian / Slate dark, cam (glassmorphism) yüzeyler, yüksek kontrast.
+ * Tüm renkler Tailwind sınıfı olarak da kullanılabilir: bg-navy-800, text-ink-muted, border-line …
+ */
+@theme {
+  --font-sans: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont,
+    "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+
+  /* Zemin (Obsidian) */
+  --color-obsidian-950: #050912;
+  --color-obsidian-900: #0A0F1C;
+  --color-obsidian-800: #0E1626;
+
+  /* Slate / Navy yüzeyler (Jira N-skalası) */
+  --color-navy-900: #091E42;
+  --color-navy-800: #172B4D;
+  --color-navy-700: #253858;
+  --color-navy-600: #344563;
+  --color-navy-500: #42526E;
+
+  /* Marka */
+  --color-brand: #0052CC;
+  --color-brand-hover: #0065FF;
+  --color-cyan: #00B8D9;
+
+  /* Semantik */
+  --color-success: #36B37E;
+  --color-warning: #FFAB00;
+  --color-danger: #FF5630;
+  --color-violet: #6554C0;
+
+  /* Durum (Kanban şeritleri) */
+  --color-status-todo: #8590A2;
+  --color-status-progress: #579DFF;
+  --color-status-blocked: #FF5630;
+  --color-status-done: #36B37E;
+
+  /* Metin */
+  --color-ink: #E6EDF7;
+  --color-ink-muted: #9FADBC;
+  --color-ink-subtle: #738496;
+
+  /* Çizgiler */
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+
+  --radius-card: 12px;
+  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 12px 40px rgb(0 0 0 / 0.38);
+}
+
+@utility glass {
+  background: rgb(23 43 77 / 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-glass);
+}
+
+@utility glass-strong {
+  background: rgb(14 22 38 / 0.82);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--color-line-strong);
+  box-shadow: var(--shadow-glass);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgb(0 82 204 / 0.18), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgb(0 184 217 / 0.10), transparent 55%),
+      var(--color-obsidian-900);
+  }
+  ::selection {
+    background: rgb(0 184 217 / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-cyan);
+    outline-offset: 2px;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-navy-600);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* React Flow koyu tema eşlemesi */
+.react-flow {
+  --xy-background-color: transparent;
+  --xy-node-border-radius: 12px;
+  --xy-edge-stroke: #579DFF;
+  --xy-edge-stroke-selected: #00B8D9;
+  --xy-edge-stroke-width: 2;
+  --xy-connectionline-stroke: #00B8D9;
+  --xy-handle-background-color: #00B8D9;
+  --xy-handle-border-color: #0A0F1C;
+  --xy-controls-button-background-color: #172B4D;
+  --xy-controls-button-background-color-hover: #253858;
+  --xy-controls-button-color: #E6EDF7;
+  --xy-controls-button-border-color: rgb(255 255 255 / 0.08);
+  --xy-minimap-background-color: #0E1626;
+  --xy-minimap-mask-background-color: rgb(5 9 18 / 0.7);
+  --xy-attribution-background-color: transparent;
+}
+.react-flow__node-lane {
+  pointer-events: none;
+}
+.react-flow__node-card .react-flow__handle {
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.react-flow__node-card:hover .react-flow__handle,
+.react-flow__node-card.selected .react-flow__handle {
+  opacity: 1;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

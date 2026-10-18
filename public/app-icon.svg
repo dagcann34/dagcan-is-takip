@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Dağcan İş Takip">
+  <defs>
+    <linearGradient id="dg-brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0052CC"/>
+      <stop offset="1" stop-color="#00B8D9"/>
+    </linearGradient>
+    <linearGradient id="dg-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E1A33"/>
+      <stop offset="1" stop-color="#091E42"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#dg-bg)"/>
+  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="url(#dg-brand)" stroke-opacity=".45" stroke-width="4"/>
+  <!-- kilit halkası -->
+  <path d="M196 178v-38a60 60 0 0 1 120 0v38" fill="none" stroke="url(#dg-brand)" stroke-width="28" stroke-linecap="round"/>
+  <!-- "D" gövdesi -->
+  <path d="M148 178h120c74 0 124 50 124 112s-50 112-124 112H148z" fill="url(#dg-brand)"/>
+  <!-- onay işareti -->
+  <path d="M212 292l38 38 76-80" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

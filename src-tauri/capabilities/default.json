@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Ana pencere ve Hızlı Görev penceresi için asgari izinler. Pano ve kısayol yalnızca Rust tarafında kullanılır.",
+  "windows": ["main", "quick"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "notification:default",
+    "opener:default"
+  ]
+}
