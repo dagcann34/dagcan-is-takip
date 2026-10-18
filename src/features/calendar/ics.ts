@@ -40,7 +40,7 @@ export function buildIcs(tasks: Task[]): string {
     if (!t.dueDate || t.status === 'done') continue;
     lines.push(
       'BEGIN:VEVENT',
-      `UID:${t.id}@kanvault`,
+      `UID:${t.id.replace(/[^\w-]/g, '')}@kanvault`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${ymd(t.dueDate)}`,
       `DTEND;VALUE=DATE:${ymd(nextDay(t.dueDate))}`,

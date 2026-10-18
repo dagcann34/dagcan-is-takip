@@ -14,7 +14,8 @@ const RULES: [RegExp, string][] = [
   [/\b[A-Z0-9-]{2,15}\\[\w.$-]{2,}\b/g, '[DOMAIN\\kullanıcı]'],
   [/\b(?:[0-9a-f]{1,4}:){4,7}[0-9a-f]{1,4}\b/gi, '[IPv6]'],
   [/\b(?:[a-z0-9-]+\.)+(?:corp|local|lan|internal|intra|ad|domain)\b/gi, '[host]'],
-  [/\b(password|parola|şifre|sifre|pwd|secret|token|apikey|api_key)\s*[:=]\s*\S+/gi, '$1: [gizli]'],
+  [/(?<![\p{L}\p{N}_])(password|parola|şifre|sifre|pwd|secret|token|apikey|api_key)\s*[:=]\s*\S+/giu, '$1: [gizli]'],
+  [/\bKV2(?:-[A-HJ-NP-Z2-9]{1,4}){8,}\b/gi, '[kurtarma anahtarı]'],
   [/\b(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,2})?\b/g, '[IP]'],
   [/\b(sk-ant-[\w-]{8,}|ghp_[\w]{20,}|AKIA[0-9A-Z]{16})\b/g, '[anahtar]'],
 ];

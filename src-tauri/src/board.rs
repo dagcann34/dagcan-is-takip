@@ -72,6 +72,9 @@ pub fn board_load(app: AppHandle, state: State<'_, BoardState>) -> Result<Option
         return Ok(None);
     }
     let bytes = fs::read(&path).map_err(|e| format!("err.export.write::{e}"))?;
+    if bytes.len() > MAX_BOARD_BYTES * 2 {
+        return Err("err.board.too_large".into());
+    }
     if let Ok(file) = serde_json::from_slice::<BoardFile>(&bytes) {
         if file.v != FILE_VERSION {
             return Err(format!("err.vault.version::{}", file.v));
@@ -80,10 +83,16 @@ pub fn board_load(app: AppHandle, state: State<'_, BoardState>) -> Result<Option
         let plain = crypto::open(&key, &file.sealed, AAD).map_err(|e| e.code())?;
         return String::from_utf8(plain.to_vec()).map(Some).map_err(|e| format!("err.vault.corrupt::{e}"));
     }
-    // Eski (v0.4.x) düz metin pano: doğrula, şifrele, üzerine yaz.
+    // Eski (v0.x) düz metin pano yalnızca bir kez, taşıma için kabul edilir. Taşıma işaretinden sonra
+    // düz metin dosya reddedilir: kimlik doğrulamasız veri şifreli deponun yerine geçemez.
+    let marker = path.with_file_name(".board-migrated");
+    if marker.exists() {
+        return Err("err.vault.corrupt::unencrypted board rejected".into());
+    }
     let legacy = String::from_utf8(bytes).map_err(|e| format!("err.vault.corrupt::{e}"))?;
     serde_json::from_str::<serde_json::Value>(&legacy).map_err(|e| format!("err.vault.corrupt::{e}"))?;
     encrypt_and_write(&app, &state, &legacy)?;
+    secure_fs::write_private(&marker, b"1").map_err(|e| format!("err.export.write::{e}"))?;
     Ok(Some(legacy))
 }
 
@@ -95,6 +104,9 @@ pub fn board_save(app: AppHandle, window: Window, state: State<'_, BoardState>, 
     }
     serde_json::from_str::<serde_json::Value>(&data).map_err(|e| format!("err.vault.corrupt::{e}"))?;
     encrypt_and_write(&app, &state, &data)?;
+    if let Ok(path) = board_path(&app) {
+        let _ = secure_fs::write_private(&path.with_file_name(".board-migrated"), b"1");
+    }
     let _ = app.emit("board-changed", window.label().to_string());
     Ok(())
 }
@@ -109,41 +121,48 @@ struct BoardExport {
 }
 
 /// Panoyu (geçmiş dahil) yedek parolasıyla şifreleyip İndirilenler'e `.kvb` olarak yazar.
-/// Yedek, bu cihazın anahtarından bağımsızdır: başka bir bilgisayarda aynı parolayla açılır.
+/// Yedek taşınabilir olduğu için (cihaz anahtarı içermez) güçlü parola ve 256 MiB Argon2id zorunludur.
 #[tauri::command]
-pub fn board_export_encrypted(app: AppHandle, password: String, data: String) -> Result<String, String> {
+pub async fn board_export_encrypted(app: AppHandle, password: String, data: String) -> Result<String, String> {
     let password = Zeroizing::new(password);
     let data = Zeroizing::new(data);
-    if password.chars().count() < 12 {
-        return Err("err.vault.pw_too_short".into());
-    }
-    if data.len() > MAX_BOARD_BYTES {
-        return Err("err.board.too_large".into());
-    }
-    serde_json::from_str::<serde_json::Value>(&data).map_err(|e| format!("err.vault.corrupt::{e}"))?;
-    let kdf = crypto::KdfParams::new_random();
-    let kek = crypto::derive_kek(password.as_bytes(), &kdf).map_err(|e| e.code())?;
-    let sealed = crypto::seal(&kek, data.as_bytes(), EXPORT_AAD).map_err(|e| e.code())?;
-    let bytes = serde_json::to_vec(&BoardExport { kanvault_board_export: 1, kdf, sealed }).map_err(|e| e.to_string())?;
-    let dir = app.path().download_dir().map_err(|e| e.to_string())?;
-    let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
-    let target = secure_fs::unique_path(&dir, &format!("kanvault-board-{stamp}.kvb"));
-    secure_fs::write_new_private(&target, &bytes).map_err(|e| format!("err.export.write::{e}"))?;
-    Ok(target.to_string_lossy().into_owned())
+    tauri::async_runtime::spawn_blocking(move || {
+        crate::vault::check_password_strength(&password)?;
+        if data.len() > MAX_BOARD_BYTES {
+            return Err("err.board.too_large".into());
+        }
+        serde_json::from_str::<serde_json::Value>(&data).map_err(|e| format!("err.vault.corrupt::{e}"))?;
+        let kdf = crypto::KdfParams::new_strong();
+        let kek = crypto::derive_kek(password.as_bytes(), &kdf).map_err(|e| e.code())?;
+        let sealed = crypto::seal(&kek, data.as_bytes(), EXPORT_AAD).map_err(|e| e.code())?;
+        let bytes = serde_json::to_vec(&BoardExport { kanvault_board_export: 1, kdf, sealed }).map_err(|e| e.to_string())?;
+        let dir = app.path().download_dir().map_err(|e| e.to_string())?;
+        let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+        let target = secure_fs::unique_path(&dir, &format!("kanvault-board-{stamp}.kvb"));
+        secure_fs::write_new_private(&target, &bytes).map_err(|e| format!("err.export.write::{e}"))?;
+        Ok(target.to_string_lossy().into_owned())
+    })
+    .await
+    .map_err(|_| "err.vault.state".to_string())?
 }
 
 /// Şifreli `.kvb` yedeğini çözer ve pano JSON'unu döner (arayüz doğrular ve kaydeder).
+/// Dosyadaki KDF parametreleri içe aktarmada daha sıkı sınırlanır (hazırlanmış dosyayla kaynak tüketimine karşı).
 #[tauri::command]
-pub fn board_import_encrypted(password: String, file: String) -> Result<String, String> {
+pub async fn board_import_encrypted(password: String, file: String) -> Result<String, String> {
     let password = Zeroizing::new(password);
-    if file.len() > MAX_BOARD_BYTES * 2 {
-        return Err("err.board.too_large".into());
-    }
-    let export: BoardExport = serde_json::from_str(&file).map_err(|_| "err.settings.import_invalid".to_string())?;
-    if export.kanvault_board_export != 1 {
-        return Err("err.settings.import_invalid".into());
-    }
-    let kek = crypto::derive_kek(password.as_bytes(), &export.kdf).map_err(|e| e.code())?;
-    let plain = crypto::open(&kek, &export.sealed, EXPORT_AAD).map_err(|_| "err.vault.wrong_password".to_string())?;
-    String::from_utf8(plain.to_vec()).map_err(|_| "err.settings.import_invalid".to_string())
+    tauri::async_runtime::spawn_blocking(move || {
+        if file.len() > MAX_BOARD_BYTES * 2 {
+            return Err("err.board.too_large".into());
+        }
+        let export: BoardExport = serde_json::from_str(&file).map_err(|_| "err.settings.import_invalid".to_string())?;
+        if export.kanvault_board_export != 1 || export.kdf.m_cost_kib > 256 * 1024 || export.kdf.t_cost > 4 || export.kdf.p_cost > 8 {
+            return Err("err.settings.import_invalid".into());
+        }
+        let kek = crypto::derive_kek(password.as_bytes(), &export.kdf).map_err(|e| e.code())?;
+        let plain = crypto::open(&kek, &export.sealed, EXPORT_AAD).map_err(|_| "err.vault.wrong_password".to_string())?;
+        String::from_utf8(plain.to_vec()).map_err(|_| "err.settings.import_invalid".to_string())
+    })
+    .await
+    .map_err(|_| "err.vault.state".to_string())?
 }

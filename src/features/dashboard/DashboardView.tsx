@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+import { toJpeg, toPng } from 'html-to-image';
+import { imagePdf, imageSize } from '../../lib/pdf';
 import { FileDown, FileImage, Table2 } from 'lucide-react';
 import { Button, Field, Input, PageHeader, Panel } from '../../components/ui';
 import { useT, type MessageKey } from '../../i18n';
@@ -58,16 +58,16 @@ export function DashboardView() {
     const el = canvasRef.current;
     if (!el) return;
     try {
-      const png = await toPng(el, { width: CANVAS_W, height: CANVAS_H, pixelRatio: 2, style: { transform: 'none' } });
+      const opts = { width: CANVAS_W, height: CANVAS_H, pixelRatio: 2, style: { transform: 'none' } };
       const base = `kanvault-dashboard-${themeId}-${timestamp()}`;
       let path: string | null;
       if (kind === 'png') {
-        path = await saveFile(`${base}.png`, dataUrlToBytes(png), 'image/png');
+        path = await saveFile(`${base}.png`, dataUrlToBytes(await toPng(el, opts)), 'image/png');
       } else {
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [CANVAS_W, CANVAS_H], hotfixes: ['px_scaling'], compress: true });
-        pdf.setProperties({ title, creator: 'Kanvault — Dağcan Nural', author: 'Dağcan Nural' });
-        pdf.addImage(png, 'PNG', 0, 0, CANVAS_W, CANVAS_H, undefined, 'FAST');
-        path = await saveFile(`${base}.pdf`, new Uint8Array(pdf.output('arraybuffer')), 'application/pdf');
+        const jpeg = await toJpeg(el, { ...opts, quality: 0.92 });
+        const px = await imageSize(jpeg);
+        const pdf = imagePdf({ jpeg: dataUrlToBytes(jpeg), pixelWidth: px.width, pixelHeight: px.height, width: CANVAS_W, height: CANVAS_H }, { title });
+        path = await saveFile(`${base}.pdf`, pdf, 'application/pdf');
       }
       if (path) toast(t('dash.exported', { path }));
     } catch (e) {

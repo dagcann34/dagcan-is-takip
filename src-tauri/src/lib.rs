@@ -90,6 +90,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
             }
             "quit" => {
                 app.state::<VaultState>().lock_now();
+                secure_clipboard::clear_pending();
                 app.exit(0);
             }
             _ => {}
@@ -274,6 +275,12 @@ pub fn run() {
             vault::vault_copy,
             ai::ai_generate,
         ])
-        .run(tauri::generate_context!())
-        .expect("Kanvault could not start");
+        .build(tauri::generate_context!())
+        .expect("Kanvault could not start")
+        .run(|_app, event| {
+            // ⌘Q / Alt+F4 / sistem kapanışı: bekleyen gizli değer panoda kalmasın.
+            if let tauri::RunEvent::Exit = event {
+                secure_clipboard::clear_pending();
+            }
+        });
 }

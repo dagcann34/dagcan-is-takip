@@ -8,13 +8,15 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  id-token: write
-  attestations: write
+permissions: {}
 
 jobs:
   build:
+    # Yazma ve OIDC yetkileri yalnızca bu job'a verilir.
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     strategy:
       fail-fast: false
       matrix:
@@ -47,8 +49,9 @@ jobs:
           ! test -f src-tauri/capabilities/default.json
           grep -q '"contentProtected": true' src-tauri/tauri.conf.json
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm audit --omit=dev --audit-level=high
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - id: tauri
         uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0

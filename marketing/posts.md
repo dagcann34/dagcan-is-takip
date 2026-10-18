@@ -1,18 +1,80 @@
-# Paylaşım Kiti / Launch Kit — Dağcan İş Takip v0.5.0
+# Kanvault — Paylaşım Kiti / Launch Kit (v1.0.0)
 
-Görseller `marketing/images/` klasöründe. Görselleri yeniden üretmek için: `bash marketing/render.sh`.
-Images live in `marketing/images/`. Regenerate with `bash marketing/render.sh`.
+Her şeyi yeniden üretmek için (uygulama `npm run dev` ile açıkken): `bash marketing/render.sh`
+Regenerate everything (with `npm run dev` running): `bash marketing/render.sh`
+
+## Dosyalar / Files
 
 | Platform | Dosya / File | Boyut / Size |
 |---|---|---|
-| X (tek görsel) | `x-tr.png`, `x-en.png` | 1600×900 |
-| X (2. görsel / thread) | `x-overview-tr.png`, `x-overview-en.png` | 1600×900 |
-| LinkedIn (bağlantı kartı / yatay) | `linkedin-tr.png`, `linkedin-en.png` | 1200×627 |
-| LinkedIn (kare, akışta daha büyük görünür) | `linkedin-square-tr.png`, `linkedin-square-en.png` | 1080×1080 |
-| Ham ekran görüntüleri | `docs/screenshots/*-tr.png`, `*-en.png` | 3200×2000 |
+| **LinkedIn — PDF karusel (belge gönderisi)** | `marketing/linkedin-carousel-tr.pdf`, `marketing/linkedin-carousel-en.pdf` | 8 slayt, 1080×1350 |
+| LinkedIn — tek görsel | `marketing/images/linkedin-square-tr.png` / `-en.png` (kare), `linkedin-tr.png` / `-en.png` (yatay) | 1080×1080 · 1200×627 |
+| X — ana görsel | `marketing/images/x-tr.png` / `x-en.png` | 1600×900 |
+| X — thread görselleri | `x-history-tr.png` / `-en.png` (Zaman Makinesi), `x-dashboard-tr.png` / `-en.png` (Dashboard Stüdyosu) | 1600×900 |
+| Ham ekran görüntüleri / raw screenshots | `docs/screenshots/*-tr.png`, `*-en.png` (overview, board, history, dashboards, dash-*, ai, settings, about) | 3200×2000 |
 
-> ✅ Paylaşmadan önce: GitHub deposunun herkese açık olduğundan ve Releases sayfasında kurulum dosyalarının bulunduğundan emin ol. Bağlantı: https://github.com/dagcann34/dagcan-is-takip
-> ✅ Before posting: make sure the GitHub repo is public and the Releases page has installers.
+> ✅ Paylaşmadan önce: https://github.com/dagcann34/kanvault herkese açık olmalı ve Releases sayfasında v1.0.0 kurulum dosyaları bulunmalı.
+> ✅ Before posting: the repo must be public and Releases must list the v1.0.0 installers.
+
+**LinkedIn'de PDF karusel nasıl paylaşılır / How to post the PDF carousel:** Gönderi oluştur → `+` (Daha fazla) → **Belge ekle** → PDF'i seç → belge başlığı: *Kanvault — BT ekipleri için ücretsiz iş ve güvenlik merkezi* / *Kanvault — free task & security hub for IT teams*.
+
+---
+
+## LinkedIn — Türkçe (PDF karusel: `linkedin-carousel-tr.pdf`)
+
+```
+Kendi kullandığım iş takip uygulamasını herkes için ücretsiz yaptım: Kanvault 🚀
+
+Bir sistem yöneticisinin günü beş ayrı araca bölünüyor: görevler bir yerde, sunucu şifreleri başka yerde, PowerShell betikleri masaüstünde, haftalık rapor e-postası hep son dakikada. Ve “geçen ay ne yaptık?” sorusunun cevabı genelde yok.
+
+Kanvault bunları tek bir masaüstü uygulamasında topluyor:
+
+🔹 Ekrana tam oturan neon Kanban pano — öncelik, son tarih, bağımlılık, kontrol listesi, süre takibi, tekrarlayan görevler ve hazır şablonlar (yama, sertifika yenileme, yedek testi…)
+
+🔹 Zaman Makinesi — her değişiklik şifreli olarak kaydediliyor. Geçmişteki herhangi bir güne dönüp panonun o günkü hâlini ve o gün yapılan her işi görebiliyorsun.
+
+🔹 Dashboard Stüdyosu — tarih aralığını seç, temayı seç (Neon HUD, Beyaz Tahta, Kara Tahta, Yönetici, Blueprint), PNG/PDF raporu al.
+
+🔹 Güvenlik — kasa Argon2id + AES-256-GCM ile şifreli ve cihaza bağlı bir gizli anahtar kullanıyor: dosya ve parola birlikte çalınsa bile açılamıyor. Ekran görüntüsü koruması, kopyalama engeli, otomatik kilit ve pano geçmişine düşmeyen güvenli kopyalama da var.
+
+🔹 AI Stüdyo — biten işleri yönetici e-postasına, STAR yöntemiyle CV maddelerine, değişiklik talebine ve olay raporuna dönüştürüyor; hassas veriler önce cihazda maskeleniyor.
+
+Windows ve macOS'ta çalışıyor, Türkçe ve İngilizce. Tamamen ücretsiz ve açık kaynak (MIT): reklam yok, abonelik yok, veri toplama yok.
+
+👉 İndir: github.com/dagcann34/kanvault
+
+Denersen geri bildirimini çok isterim. Sence hangi özellik eklenmeli? 👇
+
+#SistemYönetimi #BTAltyapı #SiberGüvenlik #AçıkKaynak #Kanban
+```
+
+## LinkedIn — English (PDF carousel: `linkedin-carousel-en.pdf`)
+
+```
+I made the work tracker I use every day free for everyone: Kanvault 🚀
+
+A sysadmin’s day is split across five tools: tasks in one place, server passwords in another, PowerShell scripts on the desktop, and the weekly status email always left to the last minute. And there’s rarely an answer to “what did we actually do last month?”
+
+Kanvault brings it all into one desktop app:
+
+🔹 A neon Kanban board that fits your screen — priorities, due dates, dependencies, checklists, time tracking, recurring tasks and ready templates (patching, certificate renewal, backup tests…)
+
+🔹 Time Machine — every change is recorded, encrypted. Go back to any past day and see the board exactly as it was, plus everything done that day.
+
+🔹 Dashboard Studio — pick a date range, pick a theme (Neon HUD, Whiteboard, Chalkboard, Executive, Blueprint), export a PNG/PDF report.
+
+🔹 Security — the vault uses Argon2id + AES-256-GCM plus a device-bound secret key, so even a stolen file and password together can’t open it. Screenshot protection, copy blocking, auto-lock and clipboard copies that never land in clipboard history.
+
+🔹 AI Studio — turns finished work into executive emails, STAR-method CV bullets, change requests and incident reports, with sensitive data masked on-device first.
+
+Runs on Windows and macOS, in English and Turkish. Completely free and open source (MIT): no ads, no subscriptions, no telemetry.
+
+👉 Download: github.com/dagcann34/kanvault
+
+If you try it, I’d love your feedback. What should it do next? 👇
+
+#SysAdmin #ITInfrastructure #CyberSecurity #OpenSource #Kanban
+```
 
 ---
 
@@ -21,192 +83,108 @@ Images live in `marketing/images/`. Regenerate with `bash marketing/render.sh`.
 ### Tek gönderi (görsel: `x-tr.png`)
 
 ```
-İşlerimi, şifrelerimi ve rapor e-postalarımı tek yerde toplamak için bir uygulama yazdım 🛠️
+Kendi iş takip uygulamamı herkes için ücretsiz yaptım: Kanvault 🛠️
 
-Dağcan İş Takip:
-- Kanban pano + PNG/PDF dışa aktarma
-- AES-256 şifreli kasa
-- AI ile yönetici özeti ve CV maddeleri
+- Ekrana oturan neon Kanban
+- Zaman Makinesi: herhangi bir güne dön
+- Beyaz/kara tahta dashboard
+- Dosya çalınsa da açılmayan kasa
 
-Ücretsiz, açık kaynak, Windows + macOS 👇
-https://github.com/dagcann34/dagcan-is-takip
+Windows + macOS · TR/EN · açık kaynak 👇
+https://github.com/dagcann34/kanvault
 ```
 
 ### Thread (5 gönderi)
 
 ```
-1/ BT altyapısında çalışırken işler Jira'da, şifreler bir not dosyasında, PowerShell betikleri masaüstünde, haftalık rapor e-postası da kafamda dağınık duruyordu.
+1/ Bir sistem yöneticisi, beş ayrı araç: görevler, şifreler, betikler, rapor e-postaları…
 
-Hepsini tek bir masaüstü uygulamasında topladım: Dağcan İş Takip 🧵
+Hepsini tek bir masaüstü uygulamasında topladım ve ücretsiz yaptım: Kanvault 🧵
 [görsel: x-tr.png]
 ```
 
 ```
-2/ ▦ Pano
-Ekrana tam oturan sabit Kanban: Yapılacak → Devam Ediyor → Engellendi → Tamamlandı.
-Yıllık takvim, tekrarlayan görevler, şablonlar, kontrol listesi, süre takibi ve tek tıkla PNG / SVG / PDF.
-[görsel: x-overview-tr.png]
+2/ ⏪ Zaman Makinesi
+Her değişiklik şifreli olarak kaydediliyor. Takvimden bir gün seç: panonun o günkü hâli ve o gün yapılan her iş karşında.
+“Geçen ay ne yaptık?” sorusu artık 2 saniye.
+[görsel: x-history-tr.png]
 ```
 
 ```
-3/ 🔒 Sıfır bilgi kasa
-Parolalar, sunucu bilgileri ve PowerShell betikleri Rust tarafında Argon2id + AES-256-GCM ile şifreleniyor.
-Boşta kalınca kilitleniyor, kopyaladığın şifre 30 sn sonra panodan siliniyor.
+3/ 📊 Dashboard Stüdyosu
+Tarih aralığı seç, tema seç: Neon HUD, Beyaz Tahta, Kara Tahta, Yönetici, Blueprint.
+Tek tıkla PNG / PDF rapor.
+[görsel: x-dashboard-tr.png]
 ```
 
 ```
-4/ AI Stüdyo (Claude)
-Biten işlerden tek tıkla:
-- Kesinti/ROI odaklı yönetici e-postası
-- STAR yöntemiyle CV ve LinkedIn maddeleri
-- CAB için değişiklik talebi (RFC)
-- Suçlamasız olay sonrası rapor
-IP, e-posta ve parolalar göndermeden önce cihazda maskeleniyor.
+4/ 🔒 Güvenlik
+Kasa: Argon2id + AES-256-GCM + cihaza bağlı gizli anahtar. Dosya ve parola birlikte çalınsa bile açılmıyor.
+Ekran görüntüsü koruması, kopyalama engeli, otomatik kilit.
 ```
 
 ```
-5/ ⌘K komut paleti, sistem tepsisi, Ctrl/⌘+Shift+Space ile hızlı görev, Türkçe/İngilizce arayüz.
-
-Tamamen ücretsiz ve MIT lisanslı. Yıldız ⭐ ve geri bildirim çok değerli:
-https://github.com/dagcann34/dagcan-is-takip
+5/ Windows + macOS, Türkçe/İngilizce, MIT lisanslı ve tamamen ücretsiz.
+Yıldız ⭐ ve geri bildirim çok değerli:
+https://github.com/dagcann34/kanvault
 ```
-
-**Hashtag önerisi (en fazla 2):** `#sysadmin #açıkkaynak`
-
----
 
 ## X — English
 
 ### Single post (image: `x-en.png`)
 
 ```
-As a sysadmin, I built the app I wanted: tasks, passwords and status emails in one place 🛠️
+I made my own work tracker free for everyone: Kanvault 🛠️
 
-Dağcan İş Takip:
-- Kanban board + PNG/PDF export
-- AES-256 encrypted vault
-- AI executive summaries & CV bullets
+- A neon Kanban that fits the screen
+- Time Machine: go back to any day
+- Whiteboard/chalkboard dashboards
+- A vault even a stolen file can't open
 
-Free, open source, Windows + macOS 👇
-https://github.com/dagcann34/dagcan-is-takip
+Windows + macOS · EN/TR · open source 👇
+https://github.com/dagcann34/kanvault
 ```
 
 ### Thread (5 posts)
 
 ```
-1/ Working in IT infrastructure, my tasks lived in Jira, passwords in a text file, PowerShell scripts on my desktop and the weekly status email in my head.
+1/ One sysadmin, five tools: tasks, passwords, scripts, status emails…
 
-So I put all of it into one desktop app: Dağcan İş Takip 🧵
+I put them all into one desktop app and made it free: Kanvault 🧵
 [image: x-en.png]
 ```
 
 ```
-2/ ▦ Board
-A fixed Kanban that fits the screen: To Do → In Progress → Blocked → Done.
-Year calendar, recurring tasks, templates, checklists, time tracking and one-click PNG / SVG / PDF export.
-[image: x-overview-en.png]
+2/ ⏪ Time Machine
+Every change is recorded, encrypted. Pick a day and see the board exactly as it was, plus everything done that day.
+“What did we do last month?” now takes 2 seconds.
+[image: x-history-en.png]
 ```
 
 ```
-3/ 🔒 Zero-knowledge vault
-Passwords, servers and PowerShell scripts are encrypted in Rust with Argon2id + AES-256-GCM.
-It auto-locks when idle, and copied secrets are wiped from the clipboard after 30s.
+3/ 📊 Dashboard Studio
+Pick a date range, pick a theme: Neon HUD, Whiteboard, Chalkboard, Executive, Blueprint.
+One-click PNG / PDF reports.
+[image: x-dashboard-en.png]
 ```
 
 ```
-4/ AI Studio (Claude)
-From finished tasks, one click gives you:
-- An executive email focused on downtime & ROI
-- STAR-method CV and LinkedIn bullets
-- A change request (RFC) for CAB
-- A blameless post-incident report
-IPs, emails and passwords are masked on-device first.
+4/ 🔒 Security
+Vault: Argon2id + AES-256-GCM + a device-bound secret key. Even a stolen file and password together can't open it.
+Screenshot protection, copy blocking, auto-lock.
 ```
 
 ```
-5/ ⌘K command palette, tray app, Ctrl/⌘+Shift+Space quick capture, English & Turkish UI.
-
-Completely free and MIT-licensed. Stars ⭐ and feedback are hugely appreciated:
-https://github.com/dagcann34/dagcan-is-takip
-```
-
-**Suggested hashtags (max 2):** `#sysadmin #opensource`
-
----
-
-## LinkedIn — Türkçe (görsel: `linkedin-square-tr.png` veya `linkedin-tr.png`)
-
-```
-Altyapı işlerimi tek bir yerde toplamak için kendi uygulamamı yazdım ve ücretsiz olarak paylaşıyorum. 🚀
-
-Bir sistem yöneticisinin günü birçok araç arasında bölünüyor: görevler bir yerde, sunucu şifreleri başka yerde, PowerShell betikleri masaüstünde, haftalık durum e-postası ise son dakikaya kalıyor. Bu dağınıklığı çözmek için Dağcan İş Takip'i geliştirdim.
-
-🔹 Neon cyberpunk Kanban pano
-Ekrana tam oturan sabit sütunlar, yıllık takvim, tekrarlayan görevler ve hazır şablonlar (yama, sertifika, yedek testi…); kontrol listesi, süre takibi ve son tarih uyarıları. Panonun tamamı PNG, SVG veya PDF olarak tek tıkla dışa aktarılıyor; tek bir kartı görsel olarak yöneticine iletebiliyorsun.
-
-🔹 Sıfır bilgi şifreli kasa
-Parolalar, sunucu bilgileri, PowerShell betikleri ve API anahtarları cihazda Argon2id + AES-256-GCM ile şifreleniyor. Ana parola hiçbir yere gönderilmiyor; uygulama boşta kalınca kilitleniyor ve kopyalanan şifre 30 saniye sonra panodan siliniyor.
-
-🔹 AI Stüdyo
-Tamamlanan işlerden tek tıkla:
-• Kesinti, risk ve ROI odaklı yönetici özeti e-postası
-• STAR yöntemiyle CV ve LinkedIn maddeleri
-• CAB'a sunulacak değişiklik talebi (RFC)
-• Suçlamasız olay sonrası rapor
-Hassas bilgiler (IP, e-posta, parola) göndermeden önce cihazda maskeleniyor; uydurma metrik yerine doldurulacak yer tutucular bırakılıyor.
-
-🔹 Günlük kullanım
-⌘K komut paleti, sistem tepsisinde çalışma, Ctrl/⌘ + Shift + Space ile hızlı görev, yerel bildirimler, Türkçe ve İngilizce arayüz.
-
-🛠️ Teknoloji: Tauri v2 (Rust) + React + TypeScript. Windows ve macOS'ta çalışıyor, MIT lisanslı ve tamamen ücretsiz.
-
-Kaynak kod ve indirme: https://github.com/dagcann34/dagcan-is-takip
-
-Denersen geri bildirimini çok isterim. Hangi özellik senin işini kolaylaştırırdı? 👇
-
-#SistemYönetimi #BTAltyapı #AçıkKaynak #SiberGüvenlik #Rust
-```
-
----
-
-## LinkedIn — English (image: `linkedin-square-en.png` or `linkedin-en.png`)
-
-```
-I built my own app to bring my infrastructure work into one place, and I'm sharing it for free. 🚀
-
-A sysadmin's day is split across too many tools: tasks in one place, server passwords in another, PowerShell scripts on the desktop, and the weekly status email always left for the last minute. Dağcan İş Takip is my answer to that.
-
-🔹 Neon cyberpunk Kanban board
-Fixed columns that fit the screen, a year calendar, recurring tasks and ready templates (patching, certificates, backup tests…); checklists, time tracking and due-date alerts. Export the whole board as PNG, SVG or PDF in one click, or share a single card as an image with your manager.
-
-🔹 Zero-knowledge encrypted vault
-Passwords, server details, PowerShell scripts and API keys are encrypted on-device with Argon2id + AES-256-GCM. The master password never leaves your machine; the app auto-locks when idle and copied secrets are wiped from the clipboard after 30 seconds.
-
-🔹 AI Studio
-From finished work, one click gives you:
-• An executive summary email focused on downtime, risk and ROI
-• STAR-method CV and LinkedIn bullets
-• A change request (RFC) ready for CAB
-• A blameless post-incident report
-Sensitive details (IPs, emails, passwords) are masked locally before sending, and missing metrics become placeholders instead of invented numbers.
-
-🔹 Everyday flow
-⌘K command palette, system tray mode, Ctrl/⌘ + Shift + Space quick capture, native notifications, English and Turkish UI.
-
-🛠️ Stack: Tauri v2 (Rust) + React + TypeScript. Runs on Windows and macOS, MIT-licensed and completely free.
-
-Source & download: https://github.com/dagcann34/dagcan-is-takip
-
-If you give it a try, I'd love your feedback. Which feature would make your day easier? 👇
-
-#SysAdmin #ITInfrastructure #OpenSource #CyberSecurity #Rust
+5/ Windows + macOS, English/Turkish, MIT-licensed and completely free.
+Stars ⭐ and feedback mean a lot:
+https://github.com/dagcann34/kanvault
 ```
 
 ---
 
 ## İpuçları / Tips
 
-- **X:** Bağlantılı gönderiler daha az erişim alabilir; alternatif olarak bağlantıyı ilk yanıta koy. / Posts with links may get less reach; you can put the link in the first reply instead.
-- **LinkedIn:** Kare görsel akışta daha fazla yer kaplar. Bağlantıyı gönderide tut; ilk yorumda GitHub Releases bağlantısını tekrar paylaş. / The square image takes more feed space. Keep the link in the post; repeat the Releases link in the first comment.
-- **Zamanlama / Timing:** Hafta içi 09:00–11:00 (TR saati) profesyonel kitle için iyi bir aralık. / Weekday mornings work well for a professional audience.
-- **Demo:** 20–30 sn'lik ekran kaydı (kart sürükleme → PDF dışa aktarma → AI e-posta) etkileşimi artırır. / A 20–30s screen recording boosts engagement.
+- **LinkedIn:** PDF karusel (belge gönderisi) akışta en çok etkileşim alan biçimdir. İlk yorumda Releases bağlantısını tekrar paylaş. / Document (PDF) posts get the most engagement; repeat the Releases link in the first comment.
+- **X:** Bağlantılı gönderiler daha az erişim alabilir; alternatif olarak bağlantıyı ilk yanıta koy. / Linked posts may get less reach; you can put the link in the first reply.
+- **Zamanlama / Timing:** Hafta içi 09:00–11:00 (TR). / Weekday mornings.
+- **Not:** Kurulum dosyaları henüz kod imzalı değil; macOS'ta ilk açılışta sağ tık → Aç. / Builds aren’t code-signed yet; on macOS right-click → Open the first time.

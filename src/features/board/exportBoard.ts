@@ -1,5 +1,5 @@
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+import { toJpeg, toPng } from 'html-to-image';
+import { imagePdf, imageSize } from '../../lib/pdf';
 import { t } from '../../i18n';
 import { dataUrlToBytes, saveFile, timestamp } from '../../lib/platform';
 
@@ -22,19 +22,12 @@ export async function exportBoard(element: HTMLElement | null, format: ExportFor
     const options = { backgroundColor: BACKGROUND, width, height, pixelRatio: PIXEL_RATIO };
     const base = `kanvault-board-${timestamp()}`;
 
-    const png = await toPng(element, options);
-    if (format === 'png') return await saveFile(`${base}.png`, dataUrlToBytes(png), 'image/png');
+    if (format === 'png') return await saveFile(`${base}.png`, dataUrlToBytes(await toPng(element, options)), 'image/png');
 
-    const pdf = new jsPDF({
-      orientation: width >= height ? 'landscape' : 'portrait',
-      unit: 'px',
-      format: [width, height],
-      hotfixes: ['px_scaling'],
-      compress: true,
-    });
-    pdf.setProperties({ title: t('board.pdfTitle'), creator: 'Kanvault — Dağcan Nural' });
-    pdf.addImage(png, 'PNG', 0, 0, width, height, undefined, 'FAST');
-    return await saveFile(`${base}.pdf`, new Uint8Array(pdf.output('arraybuffer')), 'application/pdf');
+    const jpeg = await toJpeg(element, { ...options, quality: 0.92 });
+    const px = await imageSize(jpeg);
+    const pdf = imagePdf({ jpeg: dataUrlToBytes(jpeg), pixelWidth: px.width, pixelHeight: px.height, width, height }, { title: t('board.pdfTitle') });
+    return await saveFile(`${base}.pdf`, pdf, 'application/pdf');
   } finally {
     element.classList.remove('board-exporting');
   }

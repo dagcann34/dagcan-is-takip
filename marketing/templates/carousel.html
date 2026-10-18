@@ -60,6 +60,7 @@
 <body>
 <div id="deck"></div>
 <script>
+(() => {
   const lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'tr';
   document.documentElement.lang = lang;
   const S = (n) => `../../docs/screenshots/${n}-${lang}.png`;
@@ -95,17 +96,18 @@
   }[lang];
 
   const total = C.slides.length;
-  const top = `<div class="top"><img src="../../public/favicon.svg" alt=""><b lang="en">KANVAULT</b><span lang="en">· Task &amp; Security Hub</span></div>`;
+  const topBar = `<div class="top"><img src="../../public/favicon.svg" alt=""><b lang="en">KANVAULT</b><span lang="en">· Task &amp; Security Hub</span></div>`;
   const foot = (i) => `<div class="foot"><span>${C.credit}</span><span class="n">${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}</span></div>`;
   document.getElementById('deck').innerHTML = C.slides.map((s, i) => {
     let body = '';
     if (s.type === 'cover') body = `<img class="bigicon" src="../../public/favicon.svg" alt=""><div class="kicker">${s.kicker}</div><h1 lang="en">${s.title}</h1><p class="lead">${s.lead}</p><div class="pills">${s.pills.map((p, j) => `<span class="pill ${j === 0 ? 'volt' : ''}" lang="${j === 0 ? lang : 'en'}">${p}</span>`).join('')}</div><div class="swipe">${C.swipe}</div>`;
     if (s.type === 'list') body = `<div class="kicker">${s.kicker}</div><h2>${s.title}</h2><ul>${s.items.map(([ic, t]) => `<li><i>${ic}</i><span>${t}</span></li>`).join('')}</ul>`;
     if (s.type === 'shot') body = `<div class="kicker">${s.kicker}</div><h2>${s.title}</h2><p class="lead">${s.lead}</p><div class="shot"><img src="${S(s.img)}" alt=""></div>`;
-    if (s.type === 'themes') body = `<div class="kicker">${s.kicker}</div><h2>${s.title}</h2><p class="lead">${s.lead}</p><div class="grid4">${s.imgs.map(([n, c]) => `<figure><img src="${S(n)}" alt=""><figcaption>${c}</figcaption></figure>`).join('')}</div>`;
+    if (s.type === 'themes') body = `<div class="kicker">${s.kicker}</div><h2>${s.title}</h2><p class="lead">${s.lead}</p><div class="grid4">${s.imgs.map(([n, c]) => `<figure><img src="${S(n)}" alt=""><figcaption lang="${['Neon HUD', 'Blueprint', 'Whiteboard', 'Chalkboard'].includes(c) ? 'en' : lang}">${c}</figcaption></figure>`).join('')}</div>`;
     if (s.type === 'cta') body = `<div class="kicker">${s.kicker}</div><h2>${s.title}</h2><p class="lead">${s.lead}</p><div class="cta"><div class="url">${s.url}</div><p>${s.note}</p></div>`;
-    return `<section class="slide">${top}${body}${foot(i)}</section>`;
+    return `<section class="slide">${topBar}${body}${foot(i)}</section>`;
   }).join('');
+})();
 </script>
 </body>
 </html>

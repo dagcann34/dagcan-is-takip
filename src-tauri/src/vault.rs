@@ -238,7 +238,7 @@ fn with_unlocked<T>(state: &VaultState, f: impl FnOnce(&mut Unlocked) -> CmdResu
 
 /// Ana parola gücü: en az 12 karakter, en az 3 karakter sınıfı (veya 20+ karakterlik parola cümlesi),
 /// yeterli çeşitlilik ve yaygın kalıp içermeme.
-fn check_password_strength(pw: &str) -> CmdResult<()> {
+pub fn check_password_strength(pw: &str) -> CmdResult<()> {
     let len = pw.chars().count();
     if len < MIN_PASSWORD_LEN {
         return Err("err.vault.pw_too_short".into());
@@ -285,40 +285,50 @@ pub fn vault_status(state: State<'_, VaultState>) -> CmdResult<VaultStatus> {
     })
 }
 
-/// Yeni v2 kasa oluşturur ve kurtarma anahtarını bir kez döner (arayüz kullanıcıya gösterir).
-#[tauri::command]
-pub fn vault_init(state: State<'_, VaultState>, password: String) -> CmdResult<String> {
-    let password = Zeroizing::new(password);
-    check_password_strength(&password)?;
-    if state.path.exists() {
-        return Err("err.vault.exists".into());
-    }
-    let secret = match keychain::load(SECRET_ACCOUNT)? {
-        Some(k) => k,
+/// Ağır anahtar türetme (256 MiB Argon2id) arayüz iş parçacığını dondurmasın diye arka planda çalışır.
+async fn blocking<T: Send + 'static>(app: AppHandle, f: impl FnOnce(&VaultState) -> CmdResult<T> + Send + 'static) -> CmdResult<T> {
+    tauri::async_runtime::spawn_blocking(move || f(&app.state::<VaultState>()))
+        .await
+        .map_err(|_| "err.vault.state".to_string())?
+}
+
+fn get_or_create_secret() -> CmdResult<Key> {
+    match keychain::load(SECRET_ACCOUNT)? {
+        Some(k) => Ok(k),
         None => {
             let k = crypto::random_key();
             keychain::store(SECRET_ACCOUNT, &k)?;
-            k
+            Ok(k)
         }
-    };
-    let kdf = KdfParams::new_strong();
-    let kek = crypto::derive_kek_v2(password.as_bytes(), &kdf, &secret).map_err(|e| e.code())?;
-    let dek = crypto::random_key();
-    let wrapped_dek = crypto::wrap_key(&kek, &dek, AAD_DEK_V2).map_err(|e| e.code())?;
-    let file = VaultFile { version: V2, kdf, wrapped_dek, items: Vec::new() };
-    state.persist(&file)?;
-    let mut g = state.guard()?;
-    g.unlocked = Some(Unlocked { dek, file });
-    g.last_activity = Instant::now();
-    Ok(crypto::encode_recovery(&secret).to_string())
+    }
 }
 
-/// Kasa kilidini açar. v2 kasada bu cihazda gizli anahtar yoksa `recovery` (kurtarma anahtarı) gerekir;
-/// başarılı açılışta anahtar işletim sistemi kasasına kaydedilir.
+/// Yeni v2 kasa oluşturur ve kurtarma anahtarını bir kez döner (arayüz kullanıcıya gösterir).
 #[tauri::command]
-pub fn vault_unlock(state: State<'_, VaultState>, password: String, recovery: Option<String>) -> CmdResult<()> {
+pub async fn vault_init(app: AppHandle, password: String) -> CmdResult<String> {
     let password = Zeroizing::new(password);
-    let recovery = recovery.map(Zeroizing::new);
+    blocking(app, move |state| {
+        check_password_strength(&password)?;
+        if state.path.exists() {
+            return Err("err.vault.exists".into());
+        }
+        let secret = get_or_create_secret()?;
+        let kdf = KdfParams::new_strong();
+        let kek = crypto::derive_kek_v2(password.as_bytes(), &kdf, &secret).map_err(|e| e.code())?;
+        let dek = crypto::random_key();
+        let wrapped_dek = crypto::wrap_key(&kek, &dek, AAD_DEK_V2).map_err(|e| e.code())?;
+        let file = VaultFile { version: V2, kdf, wrapped_dek, items: Vec::new() };
+        state.persist(&file)?;
+        let mut g = state.guard()?;
+        g.unlocked = Some(Unlocked { dek, file });
+        g.last_activity = Instant::now();
+        Ok(crypto::encode_recovery(&secret).to_string())
+    })
+    .await
+}
+
+/// Parolayı (ve gerekirse kurtarma anahtarını) doğrulayıp DEK'i çözer; hatalı denemeleri sayar.
+fn verify(state: &VaultState, file: &VaultFile, password: &str, recovery: Option<&str>) -> CmdResult<(Key, Option<Key>)> {
     {
         let g = state.guard()?;
         let now = unix_now();
@@ -326,14 +336,13 @@ pub fn vault_unlock(state: State<'_, VaultState>, password: String, recovery: Op
             return Err(format!("err.vault.throttled::{}", g.throttle.retry_after_unix - now));
         }
     }
-    let file = read_file(&state)?;
     let (kek, aad, recovered) = match file.version {
         V1 => (crypto::derive_kek(password.as_bytes(), &file.kdf).map_err(|e| e.code())?, AAD_DEK, None),
         V2 => {
             let (secret, recovered) = match keychain::load(SECRET_ACCOUNT)? {
                 Some(k) => (k, None),
                 None => {
-                    let text = recovery.as_ref().filter(|r| !r.trim().is_empty()).ok_or("err.vault.need_recovery")?;
+                    let text = recovery.filter(|r| !r.trim().is_empty()).ok_or("err.vault.need_recovery")?;
                     let k = crypto::decode_recovery(text).map_err(|_| "err.vault.bad_recovery".to_string())?;
                     (Zeroizing::new(*k), Some(k))
                 }
@@ -342,8 +351,13 @@ pub fn vault_unlock(state: State<'_, VaultState>, password: String, recovery: Op
         }
         v => return Err(format!("err.vault.version::{v}")),
     };
-    let dek = match crypto::unwrap_key(&kek, &file.wrapped_dek, aad) {
-        Ok(dek) => dek,
+    match crypto::unwrap_key(&kek, &file.wrapped_dek, aad) {
+        Ok(dek) => {
+            let mut g = state.guard()?;
+            g.throttle = Throttle::default();
+            state.save_throttle(&g.throttle);
+            Ok((dek, recovered))
+        }
         Err(_) => {
             // 3 hatadan sonra üstel bekleme: 2, 4, 8 … en fazla 300 sn. Diske yazılır.
             let mut g = state.guard()?;
@@ -353,18 +367,42 @@ pub fn vault_unlock(state: State<'_, VaultState>, password: String, recovery: Op
                 g.throttle.retry_after_unix = unix_now() + secs;
             }
             state.save_throttle(&g.throttle);
-            return Err("err.vault.wrong_password".into());
+            Err("err.vault.wrong_password".into())
         }
-    };
-    if let Some(k) = recovered {
-        keychain::store(SECRET_ACCOUNT, &k)?;
     }
-    let mut g = state.guard()?;
-    g.throttle = Throttle::default();
-    state.save_throttle(&g.throttle);
-    g.unlocked = Some(Unlocked { dek, file });
-    g.last_activity = Instant::now();
-    Ok(())
+}
+
+/// Kasa kilidini açar. v2 kasada bu cihazda gizli anahtar yoksa `recovery` gerekir ve başarılı açılışta
+/// anahtar işletim sistemi kasasına kaydedilir. Eski v1 kasa açıldığında aynı DEK ile v2'ye yükseltilir
+/// (256 MiB Argon2id + cihaz gizli anahtarı) ve gösterilmesi gereken kurtarma anahtarı döner.
+#[tauri::command]
+pub async fn vault_unlock(app: AppHandle, password: String, recovery: Option<String>) -> CmdResult<Option<String>> {
+    let password = Zeroizing::new(password);
+    let recovery = recovery.map(Zeroizing::new);
+    blocking(app, move |state| {
+        let mut file = read_file(state)?;
+        let (dek, recovered) = verify(state, &file, &password, recovery.as_deref().map(|s| s.as_str()))?;
+        if let Some(k) = recovered {
+            keychain::store(SECRET_ACCOUNT, &k)?;
+        }
+        let mut migrated = None;
+        if file.version == V1 {
+            check_password_strength(&password).ok();
+            let secret = get_or_create_secret()?;
+            let kdf = KdfParams::new_strong();
+            let kek = crypto::derive_kek_v2(password.as_bytes(), &kdf, &secret).map_err(|e| e.code())?;
+            file.wrapped_dek = crypto::wrap_key(&kek, &dek, AAD_DEK_V2).map_err(|e| e.code())?;
+            file.kdf = kdf;
+            file.version = V2;
+            state.persist(&file)?;
+            migrated = Some(crypto::encode_recovery(&secret).to_string());
+        }
+        let mut g = state.guard()?;
+        g.unlocked = Some(Unlocked { dek, file });
+        g.last_activity = Instant::now();
+        Ok(migrated)
+    })
+    .await
 }
 
 #[tauri::command]
@@ -386,16 +424,23 @@ pub fn vault_set_auto_lock(state: State<'_, VaultState>, minutes: u64) -> CmdRes
     Ok(())
 }
 
-/// Kasa açıkken bu cihazın kurtarma anahtarını yeniden gösterir (yalnızca v2).
+/// Kasa açıkken bu cihazın kurtarma anahtarını gösterir; ana parola yeniden doğrulanır.
 #[tauri::command]
-pub fn vault_recovery_key(state: State<'_, VaultState>) -> CmdResult<String> {
-    with_unlocked(&state, |u| {
-        if u.file.version != V2 {
+pub async fn vault_recovery_key(app: AppHandle, password: String) -> CmdResult<String> {
+    let password = Zeroizing::new(password);
+    blocking(app, move |state| {
+        if !state.is_unlocked() {
+            return Err(LOCKED.into());
+        }
+        let file = read_file(state)?;
+        if file.version != V2 {
             return Err("err.vault.version::1".into());
         }
+        verify(state, &file, &password, None)?;
         let k = keychain::load(SECRET_ACCOUNT)?.ok_or("err.vault.need_recovery")?;
         Ok(crypto::encode_recovery(&k).to_string())
     })
+    .await
 }
 
 #[tauri::command]

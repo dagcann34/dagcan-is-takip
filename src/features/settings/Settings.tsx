@@ -53,7 +53,7 @@ export function Settings() {
 
   // Pano yedeği yalnızca parolayla şifrelenmiş .kvb olarak alınır; düz metin JSON dışa aktarımı yoktur.
   async function exportEncrypted() {
-    const password = await passwordDialog(t('settings.backupPasswordPrompt'), { minLength: 12, repeat: true, confirmLabel: t('settings.exportEncrypted') });
+    const password = await passwordDialog(`${t('settings.backupPasswordPrompt')} ${t('vault.passwordPolicy')}`, { minLength: 12, repeat: true, confirmLabel: t('settings.exportEncrypted') });
     if (!password) return;
     try {
       const path = await invoke<string>('board_export_encrypted', { password, data: JSON.stringify(getBoard()) });

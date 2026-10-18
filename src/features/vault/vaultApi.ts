@@ -59,8 +59,9 @@ export const vault = {
   status: () => invoke<VaultStatus>('vault_status'),
   /** Yeni kasa oluşturur ve bir kez gösterilecek kurtarma anahtarını döner. */
   init: (password: string) => invoke<string>('vault_init', { password }),
-  unlock: (password: string, recovery?: string) => invoke<void>('vault_unlock', { password, recovery: recovery || null }),
-  recoveryKey: () => invoke<string>('vault_recovery_key'),
+  /** Eski (v1) kasa açılışta v2'ye yükseltilirse gösterilmesi gereken kurtarma anahtarını döner. */
+  unlock: (password: string, recovery?: string) => invoke<string | null>('vault_unlock', { password, recovery: recovery || null }),
+  recoveryKey: (password: string) => invoke<string>('vault_recovery_key', { password }),
   notes: (id: string) => invoke<string | null>('vault_item_notes', { id }),
   lock: () => invoke<void>('vault_lock'),
   touch: () => invoke<void>('vault_touch'),

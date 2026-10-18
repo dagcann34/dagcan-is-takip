@@ -97,12 +97,27 @@ mod imp {
 
 pub use imp::{clear_if_unchanged, write};
 
+use std::sync::atomic::{AtomicI64, Ordering};
+
+/// Henüz temizlenmemiş son gizli kopyalamanın pano sürümü (-1: yok).
+static PENDING: AtomicI64 = AtomicI64::new(-1);
+
+/// Uygulama kapanırken bekleyen gizli değeri panodan siler (zamanlayıcı iş parçacığı ölmeden önce).
+pub fn clear_pending() {
+    let token = PENDING.swap(-1, Ordering::SeqCst);
+    if token >= 0 {
+        clear_if_unchanged(token);
+    }
+}
+
 /// Değeri güvenli panoya yazar ve `after` süre sonra, pano bu arada değişmediyse temizler.
 pub fn write_with_expiry(app: tauri::AppHandle, text: &str, after: std::time::Duration) -> Result<(), String> {
     use tauri::Emitter;
     let token = write(text)?;
+    PENDING.store(token, Ordering::SeqCst);
     std::thread::spawn(move || {
         std::thread::sleep(after);
+        let _ = PENDING.compare_exchange(token, -1, Ordering::SeqCst, Ordering::SeqCst);
         if clear_if_unchanged(token) {
             let _ = app.emit("clipboard-cleared", ());
         }

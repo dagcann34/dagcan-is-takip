@@ -6,7 +6,7 @@ import { Button, EmptyState, Field, IconButton, Input, PageHeader, Panel, Select
 import { isDesktop } from '../../lib/platform';
 import { errorMessage, toast } from '../../lib/toast';
 import { ITEM_KINDS, copySensitive, generatePassword, kindLabel, vault, type ItemKind, type VaultItem, type VaultItemInput, type VaultStatus } from './vaultApi';
-import { confirmDialog } from '../../lib/dialog';
+import { confirmDialog, passwordDialog } from '../../lib/dialog';
 
 const KIND_ICON: Record<ItemKind, typeof Key> = {
   password: KeyRound,
@@ -84,8 +84,9 @@ function LockScreen({ initialized, needsRecovery, onDone }: { initialized: boole
     setBusy(true);
     try {
       if (initialized) {
-        await vault.unlock(password, needsRecovery ? recovery : undefined);
-        onDone();
+        const upgradedKey = await vault.unlock(password, needsRecovery ? recovery : undefined);
+        if (upgradedKey) setNewKey(upgradedKey);
+        else onDone();
       } else {
         // Kurtarma anahtarı yalnızca bir kez gösterilir; kullanıcı kaydettiğini onaylayınca devam edilir.
         setNewKey(await vault.init(password));
@@ -167,8 +168,10 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
   }
 
   async function revealRecovery() {
+    const password = await passwordDialog(t('vault.lockedHint'), { confirmLabel: t('vault.recoveryShow') });
+    if (!password) return;
     try {
-      setShowKey(await vault.recoveryKey());
+      setShowKey(await vault.recoveryKey(password));
     } catch (e) {
       toast(errorMessage(e), 'error');
     }

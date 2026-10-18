@@ -192,23 +192,30 @@ export async function hydrateBoard(): Promise<void> {
   } catch {
     legacy = null;
   }
+  // Eski önbellek yalnızca şifreli dosyaya başarıyla taşındıktan sonra silinir (veri kaybı olmasın).
+  let migrated = !legacy;
   try {
     const fromFile = await invoke<string | null>('board_load');
     if (fromFile) {
       JSON.parse(fromFile);
       memoryRaw = fromFile;
+      migrated = true;
     } else if (legacy) {
       JSON.parse(legacy);
       memoryRaw = legacy;
       await invoke('board_save', { data: legacy });
+      migrated = true;
     }
   } catch {
-    /* okunamazsa örnek panoyla başla */
+    /* okunamazsa eski önbelleğe dokunma; bir sonraki açılışta yeniden denenir */
+    if (legacy) memoryRaw = legacy;
   }
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* yoksay */
+  if (migrated) {
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* yoksay */
+    }
   }
 
   const { listen } = await import('@tauri-apps/api/event');
@@ -217,12 +224,18 @@ export async function hydrateBoard(): Promise<void> {
 
   // Eski sürümlerin WebView veritabanında silinmiş ama diskte kalmış düz metin sayfaları bir kez
   // tamamen temizlenir; dil gibi zararsız tercihler korunur.
-  if (self === 'main') {
+  if (self === 'main' && migrated) {
     const keep = ['dagcan.lang', 'dagcan.calendar', 'dagcan.notified.v1'];
     const saved = keep.map((k) => [k, localStorage.getItem(k)] as const);
     try {
       if (await invoke<boolean>('wipe_legacy_web_data')) {
-        for (const [k, v] of saved) if (v !== null) localStorage.setItem(k, v);
+        // Silme işlemi WebView'de eşzamansız biter; tercihleri bittikten sonra geri yaz.
+        const restore = () => {
+          for (const [k, v] of saved) if (v !== null) localStorage.setItem(k, v);
+        };
+        restore();
+        setTimeout(restore, 1500);
+        setTimeout(restore, 5000);
       }
     } catch {
       /* yoksay */
@@ -296,7 +309,12 @@ export function validateBoard(input: unknown): BoardData | null {
     (t) =>
       t &&
       typeof t.id === 'string' &&
+      /^[\w-]{1,64}$/.test(t.id) &&
       typeof t.key === 'string' &&
+      /^[\w-]{1,32}$/.test(t.key) &&
+      (t.description === undefined || (typeof t.description === 'string' && t.description.length <= 20_000)) &&
+      (t.outcome === undefined || (typeof t.outcome === 'string' && t.outcome.length <= 5_000)) &&
+      (t.checklist === undefined || (Array.isArray(t.checklist) && t.checklist.every((c) => c && typeof c.text === 'string' && typeof c.done === 'boolean'))) &&
       typeof t.title === 'string' &&
       t.title.length <= 500 &&
       STATUSES.has(t.status) &&
@@ -307,6 +325,11 @@ export function validateBoard(input: unknown): BoardData | null {
   );
   const linksOk = d.links.every((l) => l && typeof l.id === 'string' && typeof l.source === 'string' && typeof l.target === 'string');
   if (!ok || !linksOk) return null;
-  if (d.history !== undefined && !Array.isArray(d.history)) return null;
+  if (d.history !== undefined) {
+    if (!Array.isArray(d.history) || d.history.length > 50_000) return null;
+    const kinds = new Set(['created', 'updated', 'status', 'completed', 'reopened', 'deleted', 'time']);
+    if (!d.history.every((e) => e && Number.isFinite(e.at) && kinds.has(e.kind) && typeof e.taskId === 'string' && typeof e.key === 'string' && typeof e.title === 'string'))
+      return null;
+  }
   return d;
 }

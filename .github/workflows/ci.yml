@@ -37,5 +37,5 @@ jobs:
       - run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: cargo audit
         run: |
-          cargo install cargo-audit --locked
+          cargo install cargo-audit --locked --version 0.22.2
           cargo audit --file src-tauri/Cargo.lock

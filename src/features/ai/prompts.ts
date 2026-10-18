@@ -31,14 +31,14 @@ export interface PromptPair {
 }
 
 /** Görev metnindeki açılı ayraçları kaçırır: kullanıcı verisi prompt'taki XML etiketlerini kapatamaz. */
-const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function taskXml(tasks: Task[], redact: boolean): string {
   const clean = (s?: string) => (s ? escapeXml((redact ? redactSensitive(s) : s).trim()) : '');
   return tasks
     .map((t) =>
       [
-        `<is anahtar="${t.key}" oncelik="${priorityLabel(t.priority)}"${t.completedAt ? ` tamamlanma="${t.completedAt}"` : ''}>`,
+        `<is anahtar="${escapeXml(t.key)}" oncelik="${escapeXml(priorityLabel(t.priority))}"${t.completedAt ? ` tamamlanma="${escapeXml(t.completedAt)}"` : ''}>`,
         `  <baslik>${clean(t.title)}</baslik>`,
         t.description ? `  <aciklama>${clean(t.description)}</aciklama>` : '',
         t.outcome ? `  <sonuc>${clean(t.outcome)}</sonuc>` : '  <sonuc>(belirtilmemiş)</sonuc>',
