@@ -91,7 +91,7 @@ function withStatus(task: Task, status: Status): Task {
   return { ...task, status, completedAt: status === 'done' ? (task.completedAt ?? today()) : undefined };
 }
 
-function BoardCanvas({ focusTaskId }: { focusTaskId?: string | null }) {
+function BoardCanvas({ focusTaskId, onEditingChange }: { focusTaskId?: string | null; onEditingChange?: (editing: boolean) => void }) {
   const { t } = useT();
   const external = useBoard();
   const [nodes, setNodes, onNodesChange] = useNodesState<AnyNode>(toNodes(getBoard()));
@@ -180,6 +180,8 @@ function BoardCanvas({ focusTaskId }: { focusTaskId?: string | null }) {
   }
 
   const selected = nodes.find((n): n is CardNodeType => n.id === selectedId && n.type === 'card');
+  const editing = !!selected;
+  useEffect(() => onEditingChange?.(editing), [editing, onEditingChange]);
 
   return (
     <div className="flex h-full min-h-0">
@@ -377,10 +379,10 @@ function TaskEditor({
   );
 }
 
-export function Board({ focusTaskId }: { focusTaskId?: string | null }) {
+export function Board({ focusTaskId, onEditingChange }: { focusTaskId?: string | null; onEditingChange?: (editing: boolean) => void }) {
   return (
     <ReactFlowProvider>
-      <BoardCanvas focusTaskId={focusTaskId} />
+      <BoardCanvas focusTaskId={focusTaskId} onEditingChange={onEditingChange} />
     </ReactFlowProvider>
   );
 }

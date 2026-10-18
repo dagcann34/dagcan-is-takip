@@ -49,7 +49,7 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
         subtitle={`${new Date(now).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })} · ${t('overview.subtitle')}`}
       />
       <div className="flex flex-col gap-5 px-8 pb-8">
-        <div className="grid grid-cols-3 gap-4 xl:grid-cols-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
           {kpis.map(({ label, value, icon: Icon, color }) => (
             <Panel key={label} className="p-4">
               <div className="flex items-center justify-between">

@@ -7,6 +7,30 @@ Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak b
 
 ---
 
+## [0.3.0] — 2026-10-18
+
+### 🇬🇧 English
+
+**Added**
+- **Year calendar panel** on the right side of Overview and Board: all 12 months at a glance, today highlighted, task due dates and completions marked by priority-colored dots, overdue days in red and Turkish public holidays shaded. Click a day to list its tasks and open them on the board.
+- The panel is a fixed layout element — it cannot be dragged or moved when selected — and can be hidden or shown; the choice is remembered.
+
+**Changed**
+- Overview KPI tiles adapt to the available width.
+- The calendar hides automatically while a task is being edited on the board, keeping the canvas wide.
+
+### 🇹🇷 Türkçe
+
+**Eklenenler**
+- Genel Bakış ve Pano ekranlarının sağ tarafına **yıllık takvim paneli**: 12 ay tek bakışta, bugün vurgulu, görev teslim ve tamamlanma günleri önceliğe göre renkli noktalarla, gecikmiş günler kırmızı, Türkiye resmi tatilleri renkli. Bir güne tıklayınca o günün görevleri listelenir ve panoda açılabilir.
+- Panel sabit bir yerleşim öğesidir; seçildiğinde sürüklenmez veya yerinden oynamaz. Gizlenip gösterilebilir ve tercih hatırlanır.
+
+**Değişenler**
+- Genel Bakış gösterge kutuları mevcut genişliğe uyum sağlar.
+- Panoda bir görev düzenlenirken takvim otomatik gizlenir, böylece tuval geniş kalır.
+
+---
+
 ## [0.2.0] — 2026-10-18
 
 ### 🇬🇧 English
@@ -69,5 +93,6 @@ Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak b
 - AI Stüdyo: Claude API ile yönetici özeti e-postası ve STAR yöntemli CV/LinkedIn dönüştürücü, yerel maskeleme.
 - Sistem tepsisi / menü çubuğu, global Hızlı Görev kısayolu, son tarih için yerel bildirimler.
 
+[0.3.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.1.0

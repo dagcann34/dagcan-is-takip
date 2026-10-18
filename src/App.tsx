@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Command, KanbanSquare, LayoutDashboard, Settings2, ShieldCheck, Sparkles } from 'lucide-react';
+import { CalendarDays, Command, KanbanSquare, LayoutDashboard, Settings2, ShieldCheck, Sparkles } from 'lucide-react';
 import { CommandPalette, type View } from './components/CommandPalette';
 import { Board } from './features/board/Board';
 import { useBoard } from './features/board/boardStore';
 import { dueInfo } from './features/board/types';
 import { Overview } from './features/overview/Overview';
+import { YearCalendar } from './features/calendar/YearCalendar';
 import { Settings } from './features/settings/Settings';
 import { VaultView } from './features/vault/VaultView';
 import { AiStudio } from './features/ai/AiStudio';
@@ -26,6 +27,24 @@ export function App() {
   const [view, setView] = useState<View>(initialView);
   const [focusTaskId, setFocusTaskId] = useState<string | null>(null);
   const board = useBoard();
+  const [calendarOpen, setCalendarOpen] = useState(() => {
+    try {
+      return localStorage.getItem('dagcan.calendar') !== 'off';
+    } catch {
+      return true;
+    }
+  });
+  const [boardEditing, setBoardEditing] = useState(false);
+  const toggleCalendar = (open: boolean) => {
+    setCalendarOpen(open);
+    try {
+      localStorage.setItem('dagcan.calendar', open ? 'on' : 'off');
+    } catch {
+      /* yoksay */
+    }
+  };
+  const calendarView = view === 'overview' || view === 'board';
+  const showCalendar = calendarView && calendarOpen && !(view === 'board' && boardEditing);
   const urgent = board.tasks.filter((x) => {
     const tone = dueInfo(x)?.tone;
     return tone === 'overdue' || tone === 'soon';
@@ -77,13 +96,23 @@ export function App() {
           <div className="text-ink-subtle/70">v{__APP_VERSION__}</div>
         </div>
       </nav>
-      <main className="min-w-0 flex-1">
+      <main className="relative min-w-0 flex-1">
         {view === 'overview' && <Overview onOpenTask={openTask} />}
-        {view === 'board' && <Board focusTaskId={focusTaskId} />}
+        {view === 'board' && <Board focusTaskId={focusTaskId} onEditingChange={setBoardEditing} />}
         {view === 'vault' && <VaultView />}
         {view === 'ai' && <AiStudio />}
         {view === 'settings' && <Settings />}
+        {calendarView && !calendarOpen && (
+          <button
+            onClick={() => toggleCalendar(true)}
+            title={t('calendar.show')}
+            className="glass absolute top-5 right-5 z-10 grid size-10 place-items-center rounded-xl text-ink-muted hover:text-cyan"
+          >
+            <CalendarDays className="size-4" />
+          </button>
+        )}
       </main>
+      {showCalendar && <YearCalendar onOpenTask={openTask} onClose={() => toggleCalendar(false)} />}
       <CommandPalette views={views} onNavigate={setView} onOpenTask={openTask} />
       <Toaster />
     </div>

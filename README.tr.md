@@ -30,6 +30,7 @@ Sistem yöneticileri iş kayıtlarını, PowerShell betiklerini, sunucu parolala
 
 | | |
 |---|---|
+| **Yıllık takvim** | Sağda sabit panel: 12 ay, teslim ve tamamlanma günleri, gecikmeler ve resmi tatiller; güne tıklayınca görevleri listelenir |
 | **Genel Bakış paneli** | Açık, gecikmiş, bu hafta teslim, son 7 günde biten, engellenen iş ve takip edilen süre göstergeleri; durum dağılımı; yaklaşan teslimler |
 | **Kanban + beyaz tahta** | Kartları Yapılacak / Devam Ediyor / Engellendi / Tamamlandı arasında sürükle, bağımlılık okları çiz, mini harita, öncelik ve son tarih rozetleri |
 | **Dışa aktarma ve paylaşım** | Panonun tamamını yüksek çözünürlüklü PNG, vektörel SVG veya PDF olarak; tek bir kartı görsel olarak (kaydedilir + panoya kopyalanır) |

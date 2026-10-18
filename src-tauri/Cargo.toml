@@ -1,6 +1,6 @@
 [package]
 name = "dagcan-is-takip"
-version = "0.2.0"
+version = "0.3.0"
 description = "Dağcan İş Takip — Enterprise Task & Security Hub"
 edition = "2021"
 

@@ -30,6 +30,7 @@ Sysadmins juggle tickets, PowerShell snippets, server passwords and status email
 
 | | |
 |---|---|
+| **Year calendar** | Fixed right-side panel with all 12 months, due dates, completions, overdue days and Turkish public holidays; click a day to see its tasks |
 | **Overview dashboard** | Open, overdue, due-this-week, done-in-7-days, blocked and tracked-time KPIs, status distribution, upcoming deadlines |
 | **Kanban + whiteboard** | Drag cards between To Do / In Progress / Blocked / Done, draw dependency arrows, minimap, priorities, due-date badges |
 | **Export & share** | Whole board as high-res PNG, vector SVG or PDF; any single card as an image (saved + copied to clipboard) |
