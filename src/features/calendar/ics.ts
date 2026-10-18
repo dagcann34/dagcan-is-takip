@@ -9,7 +9,7 @@ const RRULE: Record<Recurrence, string> = {
 };
 
 /** RFC 5545 metin kaçışı ve 75 oktet satır katlama. */
-const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
 function fold(line: string): string {
   const bytes = new TextEncoder().encode(line);
   if (bytes.length <= 75) return line;
@@ -35,12 +35,12 @@ function nextDay(iso: string): string {
 /** Açık görevlerin teslim tarihlerini tüm gün etkinlikleri olarak dışa aktarır. */
 export function buildIcs(tasks: Task[]): string {
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Dagcan Is Takip//TR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Dağcan İş Takip'];
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Dagcan Nural//Kanvault//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Kanvault'];
   for (const t of tasks) {
     if (!t.dueDate || t.status === 'done') continue;
     lines.push(
       'BEGIN:VEVENT',
-      `UID:${t.id}@dagcan-is-takip`,
+      `UID:${t.id}@kanvault`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${ymd(t.dueDate)}`,
       `DTEND;VALUE=DATE:${ymd(nextDay(t.dueDate))}`,

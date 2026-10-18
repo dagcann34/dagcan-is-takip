@@ -42,6 +42,7 @@
   .pills { display: flex; flex-wrap: wrap; gap: 10px; }
   .pill { border: 1px solid var(--line); background: rgb(0 240 255 / .05); padding: 8px 16px; font-size: 16px; font-weight: 700; font-family: Rajdhani, sans-serif; letter-spacing: .08em; text-transform: uppercase; clip-path: polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px); }
   .pill.free { background: var(--volt); border-color: var(--volt); color: #06070E; }
+  .credit { font-size: 15px; color: var(--muted); margin-top: -12px; }
   .url { font-size: 16px; color: var(--muted); font-family: 'JetBrains Mono Variable', monospace; }
   .shot { overflow: hidden; border: 1px solid rgb(0 240 255 / .5);
           box-shadow: 0 40px 120px rgb(0 0 0 / .7), 0 0 40px rgb(0 240 255 / .25), 0 0 0 8px rgb(255 46 136 / .12); background: var(--bg); }
@@ -76,12 +77,13 @@
 <div class="grid-bg"></div>
 <div class="wrap">
   <div class="left">
-    <div class="brand"><img src="../../public/favicon.svg" alt="" /><div><b>Dağcan İş Takip</b><span id="tagline" lang="en"></span></div></div>
+    <div class="brand"><img src="../../public/favicon.svg" alt="" /><div><b lang="en">Kanvault</b><span id="tagline" lang="en"></span></div></div>
     <h1 id="title"></h1>
     <p class="sub" id="sub"></p>
     <ul id="features"></ul>
     <div class="pills" id="pills"></div>
-    <div class="url">github.com/dagcann34/dagcan-is-takip</div>
+    <div class="url">github.com/dagcann34/kanvault</div>
+    <div class="credit" id="credit"></div>
   </div>
   <div class="right"><div class="shot"><img id="shot" alt="" /></div></div>
 </div>
@@ -97,30 +99,33 @@
     tr: {
       tagline: 'Task & Security Hub',
       title: 'İşlerin, şifrelerin ve raporların <em>tek uygulamada.</em>',
+      credit: 'Dağcan Nural tarafından geliştirilmiştir',
       sub: 'BT altyapı ekipleri için Kanban pano, sıfır bilgi şifreli kasa ve AI raporlama.',
       features: [
         ['▦', 'Sabit Kanban pano, PNG / SVG / PDF dışa aktarma'],
         ['🔒', 'Argon2id + AES-256-GCM şifreli kasa, otomatik kilit'],
         ['✦', 'AI ile yönetici e-postası, CV (STAR), RFC ve olay raporu'],
-        ['⌘', 'Yıllık takvim, tekrarlayan görevler, komut paleti'],
+        ['⏱', 'Zaman Makinesi ve Beyaz Tahta / Kara Tahta dashboardları'],
       ],
       pills: ['Ücretsiz & açık kaynak', 'Windows', 'macOS', 'TR / EN'],
     },
     en: {
       tagline: 'Task & Security Hub',
       title: 'Your tasks, secrets and reports <em>in one app.</em>',
+      credit: 'Developed by Dağcan Nural',
       sub: 'Kanban board, zero-knowledge vault and AI reporting for IT infrastructure teams.',
       features: [
         ['▦', 'Fixed Kanban board with PNG / SVG / PDF export'],
         ['🔒', 'Argon2id + AES-256-GCM encrypted vault with auto-lock'],
         ['✦', 'AI executive emails, STAR CV bullets, RFCs and postmortems'],
-        ['⌘', 'Year calendar, recurring tasks, command palette'],
+        ['⏱', 'Time Machine + Whiteboard / Chalkboard dashboards'],
       ],
       pills: ['Free & open source', 'Windows', 'macOS', 'EN / TR'],
     },
   }[lang];
 
   document.getElementById('tagline').textContent = copy.tagline;
+  document.getElementById('credit').textContent = copy.credit;
   document.getElementById('title').innerHTML = copy.title;
   document.getElementById('sub').textContent = copy.sub;
   document.getElementById('features').innerHTML = copy.features.map(([i, t]) => `<li><i>${i}</i><span>${t}</span></li>`).join('');

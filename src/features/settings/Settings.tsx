@@ -1,20 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, ExternalLink, Languages, Power, ShieldCheck, Upload } from 'lucide-react';
+import { Download, ExternalLink, EyeOff, Languages, Power, ShieldCheck, Upload } from 'lucide-react';
+import { getScreenProtection, setScreenProtection } from '../../lib/security';
+import { invoke } from '@tauri-apps/api/core';
+import { confirmDialog, passwordDialog } from '../../lib/dialog';
 import { Button, PageHeader, Panel } from '../../components/ui';
 import { setLang, useT, type Lang } from '../../i18n';
-import { isDesktop, openExternal, saveFile, timestamp } from '../../lib/platform';
+import { isDesktop, openExternal } from '../../lib/platform';
 import { errorMessage, toast } from '../../lib/toast';
-import { getBoard, saveBoard } from '../board/boardStore';
-import type { BoardData } from '../board/types';
+import { getBoard, saveBoard, validateBoard } from '../board/boardStore';
 import { vault } from '../vault/vaultApi';
 
-export const REPO_URL = 'https://github.com/dagcann34/dagcan-is-takip';
+import { REPO_URL } from '../about/AboutView';
 const isMac = navigator.platform.toLowerCase().includes('mac');
 
 export function Settings() {
   const { t, lang } = useT();
   const fileInput = useRef<HTMLInputElement>(null);
   const [autostart, setAutostart] = useState<boolean | null>(null);
+  const [screenProtect, setScreenProtectState] = useState(true);
+
+  useEffect(() => {
+    if (isDesktop) getScreenProtection().then(setScreenProtectState);
+  }, []);
+
+  async function toggleScreenProtect() {
+    try {
+      await setScreenProtection(!screenProtect);
+      setScreenProtectState(!screenProtect);
+      toast(!screenProtect ? t('settings.screenProtectOn') : t('settings.screenProtectOff'));
+    } catch (e) {
+      toast(errorMessage(e), 'error');
+    }
+  }
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -34,25 +51,31 @@ export function Settings() {
     }
   }
 
-  async function exportBoardJson() {
+  // Pano yedeği yalnızca parolayla şifrelenmiş .kvb olarak alınır; düz metin JSON dışa aktarımı yoktur.
+  async function exportEncrypted() {
+    const password = await passwordDialog(t('settings.backupPasswordPrompt'), { minLength: 12, repeat: true, confirmLabel: t('settings.exportEncrypted') });
+    if (!password) return;
     try {
-      const bytes = new TextEncoder().encode(JSON.stringify(getBoard(), null, 2));
-      const path = await saveFile(`dagcan-board-${timestamp()}.json`, bytes, 'application/json');
+      const path = await invoke<string>('board_export_encrypted', { password, data: JSON.stringify(getBoard()) });
       toast(t('board.exported', { path }));
     } catch (e) {
       toast(errorMessage(e), 'error');
     }
   }
 
-  async function importBoardJson(file: File) {
+  async function importEncrypted(file: File) {
+    if (file.size > 60 << 20) return toast(t('settings.importInvalid'), 'error');
+    const password = await passwordDialog(t('settings.backupPasswordImport'), { confirmLabel: t('settings.importEncrypted') });
+    if (!password) return;
     try {
-      const data = JSON.parse(await file.text()) as BoardData;
-      if (!Array.isArray(data.tasks) || !Array.isArray(data.links) || typeof data.seq !== 'number') throw new Error();
-      if (!confirm(t('settings.confirmImport'))) return;
+      const json = await invoke<string>('board_import_encrypted', { password, file: await file.text() });
+      const data = validateBoard(JSON.parse(json));
+      if (!data) throw 'err.settings.import_invalid';
+      if (!(await confirmDialog(t('settings.confirmImport'), { danger: true }))) return;
       saveBoard(data);
       toast(t('settings.imported', { count: data.tasks.length }));
-    } catch {
-      toast(t('settings.importInvalid'), 'error');
+    } catch (e) {
+      toast(errorMessage(e), 'error');
     }
   }
 
@@ -100,25 +123,26 @@ export function Settings() {
             <ShieldCheck className="size-4 text-cyan" /> {t('settings.backup')}
           </h3>
           <div className="flex flex-col gap-2">
-            <Button onClick={exportBoardJson}>
-              <Download className="size-4" /> {t('settings.exportBoard')}
-            </Button>
-            <Button onClick={() => fileInput.current?.click()}>
-              <Upload className="size-4" /> {t('settings.importBoard')}
-            </Button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept="application/json,.json"
-              hidden
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) importBoardJson(f);
-                e.target.value = '';
-              }}
-            />
             {isDesktop && (
               <>
+                <Button onClick={exportEncrypted}>
+                  <Download className="size-4" /> {t('settings.exportEncrypted')}
+                </Button>
+                <Button onClick={() => fileInput.current?.click()}>
+                  <Upload className="size-4" /> {t('settings.importEncrypted')}
+                </Button>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept=".kvb"
+                  hidden
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) importEncrypted(f);
+                    e.target.value = '';
+                  }}
+                />
+                <p className="text-xs text-ink-subtle">{t('settings.encryptedBackupHint')}</p>
                 <Button onClick={exportVault}>
                   <Download className="size-4" /> {t('settings.exportVault')}
                 </Button>
@@ -127,6 +151,29 @@ export function Settings() {
             )}
           </div>
         </Panel>
+
+        {isDesktop && (
+          <Panel className="p-5">
+            <h3 className="mb-4 flex items-center gap-2 font-semibold">
+              <EyeOff className="size-4 text-cyan" /> {t('settings.security')}
+            </h3>
+            <label className="flex cursor-pointer items-start justify-between gap-4">
+              <span>
+                <span className="block text-sm">{t('settings.screenProtect')}</span>
+                <span className="mt-1 block text-xs text-ink-subtle">{t('settings.screenProtectHint')}</span>
+              </span>
+              <button
+                role="switch"
+                aria-checked={screenProtect}
+                onClick={toggleScreenProtect}
+                className={`relative h-6 w-11 shrink-0 transition-colors ${screenProtect ? 'bg-brand shadow-[0_0_12px_rgb(255_46_136/0.5)]' : 'bg-white/15'}`}
+              >
+                <span className={`absolute top-0.5 size-5 bg-white transition-all ${screenProtect ? 'left-[22px]' : 'left-0.5'}`} />
+              </button>
+            </label>
+            <p className="mt-4 text-xs leading-relaxed text-ink-subtle">{t('settings.securitySummary')}</p>
+          </Panel>
+        )}
 
         {isDesktop && (
           <Panel className="p-5">
@@ -166,7 +213,7 @@ export function Settings() {
 
         <Panel className="p-5">
           <h3 className="mb-4 flex items-center gap-3 font-semibold">
-            <img src="/favicon.svg" alt="" className="size-7" /> Dağcan İş Takip
+            <img src="/favicon.svg" alt="" className="size-7" /> <span lang="en">Kanvault</span>
           </h3>
           <dl className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between">

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Dağcan İş Takip",
-  "mainBinaryName": "dagcan-is-takip",
-  "version": "0.5.0",
+  "productName": "Kanvault",
+  "mainBinaryName": "kanvault",
+  "version": "1.0.0",
   "identifier": "com.dagcan.istakip",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -14,17 +14,18 @@
     "windows": [
       {
         "label": "main",
-        "title": "Dağcan İş Takip",
+        "title": "Kanvault",
         "width": 1440,
         "height": 900,
         "minWidth": 1100,
         "minHeight": 700,
         "center": true,
-        "theme": "Dark"
+        "theme": "Dark",
+        "contentProtected": true
       },
       {
         "label": "quick",
-        "title": "Hızlı Görev",
+        "title": "Kanvault — Quick Task",
         "width": 560,
         "height": 236,
         "visible": false,
@@ -33,18 +34,20 @@
         "resizable": false,
         "skipTaskbar": true,
         "center": true,
-        "theme": "Dark"
+        "theme": "Dark",
+        "contentProtected": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src ipc: http://ipc.localhost"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "freezePrototype": true
     }
   },
   "bundle": {
     "active": true,
     "targets": "all",
     "category": "Productivity",
-    "shortDescription": "Enterprise Task & Security Hub",
+    "shortDescription": "Kanvault — Task & Security Hub",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -63,6 +66,9 @@
         ],
         "displayLanguageSelector": true
       }
-    }
+    },
+    "longDescription": "Free, open-source task board with a zero-knowledge vault and AI reporting for IT teams. Developed by Dağcan Nural. / BT ekipleri için ücretsiz, açık kaynak iş panosu, sıfır bilgi kasası ve AI raporlama. Dağcan Nural tarafından geliştirilmiştir.",
+    "copyright": "© 2026 Dağcan Nural — MIT License",
+    "publisher": "Dağcan Nural"
   }
 }

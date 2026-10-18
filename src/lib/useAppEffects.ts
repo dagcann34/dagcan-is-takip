@@ -47,7 +47,7 @@ export function useDueReminders() {
       });
       for (const task of due) {
         const overdue = new Date(`${task.dueDate}T23:59:59`).getTime() < now;
-        notify(overdue ? t('notify.overdue', { key: task.key }) : t('notify.upcoming', { key: task.key }), task.title);
+        notify(overdue ? t('notify.overdue', { key: task.key }) : t('notify.upcoming', { key: task.key }), t('notify.openApp'));
         sent.push(`${task.id}:${task.dueDate}`);
       }
       if (due.length) localStorage.setItem(NOTIFIED_KEY, JSON.stringify(sent.slice(-500)));

@@ -34,9 +34,14 @@ export function QuickCapture() {
   }
 
   return (
-    <form onSubmit={submit} className="flex h-full flex-col gap-3 border border-cyan/40 bg-obsidian-900 p-4 shadow-[inset_0_0_30px_rgb(0_240_255/0.08)]" data-tauri-drag-region>
-      <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-ink-muted uppercase" data-tauri-drag-region>
-        <Zap className="size-3.5 text-cyan" /> {t('app.quickTask')}
+    <form
+      onSubmit={submit}
+      className="relative flex h-full flex-col gap-3 overflow-hidden border border-cyan/45 bg-obsidian-900 p-4 shadow-[inset_0_0_30px_rgb(0_240_255/0.08)]"
+      data-tauri-drag-region
+    >
+      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-magenta via-cyan to-transparent" />
+      <div className="font-display flex items-center gap-2 text-[13px] font-semibold tracking-[0.12em] text-ink-muted uppercase" data-tauri-drag-region>
+        <Zap className="size-3.5 text-cyan drop-shadow-[0_0_6px_rgb(0_240_255/0.8)]" /> {t('app.quickTask')}
       </div>
       <input
         ref={input}
@@ -44,27 +49,38 @@ export function QuickCapture() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder={t('quick.placeholder')}
-        className="h-12 notch-sm border border-line-strong bg-navy-800 px-4 text-base outline-none placeholder:text-ink-subtle focus:border-cyan/60"
+        aria-label={t('quick.placeholder')}
+        className="notch-sm h-12 border border-line-field bg-navy-800 px-4 text-base text-ink caret-cyan transition-[border-color,box-shadow] outline-none placeholder:text-ink-subtle focus:border-cyan/70 focus:shadow-[0_0_0_1px_rgb(0_240_255/0.3),0_0_14px_rgb(0_240_255/0.15)]"
       />
-      <div className="flex items-center gap-2">
-        {(Object.keys(PRIORITY) as Priority[]).map((p) => (
-          <button
-            type="button"
-            key={p}
-            onClick={() => setPriority(p)}
-            className={`h-8 px-3 text-xs font-medium transition-colors ${priority === p ? 'bg-white/10 text-ink' : 'text-ink-muted hover:bg-white/5'}`}
-            style={priority === p ? { boxShadow: `inset 0 0 0 1px ${PRIORITY[p].color}` } : undefined}
-          >
-            {priorityLabel(p)}
-          </button>
-        ))}
+      <div className="flex items-center gap-1.5">
+        {(Object.keys(PRIORITY) as Priority[]).map((p) => {
+          const on = priority === p;
+          return (
+            <button
+              type="button"
+              key={p}
+              aria-pressed={on}
+              onClick={() => setPriority(p)}
+              className={`font-display flex h-8 items-center gap-1.5 border px-2.5 text-[13px] font-semibold tracking-wide transition-colors ${
+                on ? 'bg-white/[0.06] text-ink' : 'border-line text-ink-muted hover:border-line-strong hover:text-ink'
+              }`}
+              style={on ? { borderColor: PRIORITY[p].color, boxShadow: `0 0 10px ${PRIORITY[p].color}33` } : undefined}
+            >
+              <span aria-hidden className="size-1.5 rotate-45" style={{ background: PRIORITY[p].color }} />
+              {priorityLabel(p)}
+            </button>
+          );
+        })}
         <input
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="ml-auto h-8 border border-line bg-navy-800 px-2 text-xs text-ink-muted"
+          className="ml-auto h-8 border border-line-field bg-navy-800 px-2 font-mono text-xs text-ink-muted transition-colors outline-none hover:border-cyan/45 focus:border-cyan/70"
         />
-        <button type="submit" className="flex h-8 items-center gap-1.5 bg-volt px-3 font-display text-sm font-bold uppercase text-obsidian-950 hover:bg-[#fff35a]">
+        <button
+          type="submit"
+          className="notch-sm font-display flex h-8 items-center gap-1.5 bg-volt px-3 text-sm font-bold text-obsidian-950 uppercase transition-[background-color,box-shadow] hover:bg-[#fff35a] hover:shadow-[0_0_14px_rgb(252_238_10/0.45)] active:translate-y-px"
+        >
           {t('common.add')} <CornerDownLeft className="size-3.5" />
         </button>
       </div>

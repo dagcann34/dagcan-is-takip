@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "quick",
+  "description": "Hızlı Görev penceresi: yalnızca pano okuma/yazma ve kendini gizleme.",
+  "windows": [
+    "quick"
+  ],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "allow-board-load",
+    "allow-board-save"
+  ]
+}

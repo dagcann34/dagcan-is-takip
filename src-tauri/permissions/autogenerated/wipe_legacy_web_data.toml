@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-wipe-legacy-web-data"
+description = "Enables the wipe_legacy_web_data command without any pre-configured scope."
+commands.allow = ["wipe_legacy_web_data"]
+
+[[permission]]
+identifier = "deny-wipe-legacy-web-data"
+description = "Denies the wipe_legacy_web_data command without any pre-configured scope."
+commands.deny = ["wipe_legacy_web_data"]

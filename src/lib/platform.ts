@@ -1,4 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
+import { confirmDialog } from './dialog';
+import { t } from '../i18n';
 
 /** Masaüstü (Tauri) içinde mi çalışıyoruz, yoksa düz tarayıcı önizlemesinde mi? */
 export const isDesktop = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -23,10 +25,11 @@ export function dataUrlToBytes(dataUrl: string): Uint8Array {
 }
 
 /**
- * Dosyayı kaydeder. Masaüstünde Rust tarafı İndirilenler klasörüne yazar ve tam yolu döner;
- * tarayıcıda klasik indirme bağlantısı kullanılır.
+ * Şifresiz bir dışa aktarım dosyasını kaydeder. Kullanıcıdan önce açık onay alınır; iptal edilirse
+ * `null` döner. Masaüstünde Rust tarafı İndirilenler klasörüne (0600, üzerine yazmadan) yazar.
  */
-export async function saveFile(fileName: string, bytes: Uint8Array, mime: string): Promise<string> {
+export async function saveFile(fileName: string, bytes: Uint8Array, mime: string): Promise<string | null> {
+  if (!(await confirmDialog(t('export.plainConfirm'), { confirmLabel: t('export.plainConfirmBtn') }))) return null;
   if (isDesktop) {
     return invoke<string>('save_export', { fileName, base64: bytesToBase64(bytes) });
   }
@@ -39,7 +42,7 @@ export async function saveFile(fileName: string, bytes: Uint8Array, mime: string
   return fileName;
 }
 
-/** Yerel OS bildirimi (macOS / Windows Bildirim Merkezi). */
+/** Yerel OS bildirimi (macOS / Windows Bildirim Merkezi). Görev içeriği gönderilmez; yalnızca anahtar. */
 export async function notify(title: string, body: string): Promise<void> {
   if (isDesktop) {
     const n = await import('@tauri-apps/plugin-notification');

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-vault-init"
+description = "Enables the vault_init command without any pre-configured scope."
+commands.allow = ["vault_init"]
+
+[[permission]]
+identifier = "deny-vault-init"
+description = "Denies the vault_init command without any pre-configured scope."
+commands.deny = ["vault_init"]

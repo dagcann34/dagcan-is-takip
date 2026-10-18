@@ -1,0 +1,55 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Ana pencere: tüm uygulama komutları ve gerekli eklenti izinleri.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:event:allow-unlisten",
+    "core:event:allow-listen",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-set-focus",
+    "notification:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/dagcann34/*"
+        },
+        {
+          "url": "https://platform.claude.com/*"
+        }
+      ]
+    },
+    "autostart:allow-enable",
+    "autostart:allow-disable",
+    "autostart:allow-is-enabled",
+    "allow-save-export",
+    "allow-set-tray-labels",
+    "allow-set-content-protection",
+    "allow-board-load",
+    "allow-board-save",
+    "allow-vault-status",
+    "allow-vault-init",
+    "allow-vault-unlock",
+    "allow-vault-lock",
+    "allow-vault-touch",
+    "allow-vault-set-auto-lock",
+    "allow-vault-list",
+    "allow-vault-upsert",
+    "allow-vault-delete",
+    "allow-vault-reveal",
+    "allow-vault-copy",
+    "allow-vault-export-backup",
+    "allow-ai-generate",
+    "allow-get-content-protection",
+    "allow-copy-sensitive-text",
+    "allow-wipe-legacy-web-data",
+    "allow-vault-item-notes",
+    "allow-vault-recovery-key",
+    "allow-board-export-encrypted",
+    "allow-board-import-encrypted"
+  ]
+}

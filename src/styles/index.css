@@ -44,11 +44,14 @@
   /* Metin */
   --color-ink: #E8F7FF;
   --color-ink-muted: #93A6CC;
-  --color-ink-subtle: #63739A;
+  /* #7A8BB3: navy-700 üzerinde 5.0:1, zeminde 5.9:1 (eski #63739A küçük metinde AA'yı geçmiyordu) */
+  --color-ink-subtle: #7A8BB3;
 
   /* Çizgiler */
   --color-line: rgb(0 240 255 / 0.12);
   --color-line-strong: rgb(0 240 255 / 0.26);
+  /* Form alanı kenarı: alan dolgusuna 3.6:1, panel yüzeylerine ≥3.0:1 (WCAG 1.4.11) */
+  --color-line-field: #4A6A8C;
 
   --radius-card: 4px;
   --shadow-glass: 0 0 0 1px rgb(0 240 255 / 0.04) inset, 0 18px 50px rgb(0 0 0 / 0.55);
@@ -65,6 +68,87 @@
 }
 @utility notch-tr {
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+/*
+ * Kesik köşe çerçevesi: clip-path kenarlığı köşede keser; bu yardımcı kesik köşelere
+ * ince bir diyagonal çizgi çizer. Öğenin position: relative olması gerekir.
+ * --notch (köşe boyu) ve --notch-color ile ayarlanır.
+ */
+@utility notch-frame {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: var(--notch, 10px);
+    height: var(--notch, 10px);
+    pointer-events: none;
+    z-index: 1;
+    transition: background 150ms ease;
+  }
+  &::before {
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, transparent 50%, var(--notch-color, var(--color-line-strong)) 50%, var(--notch-color, var(--color-line-strong)) calc(50% + 1px), transparent calc(50% + 1px));
+  }
+  &::after {
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent calc(50% - 1px), var(--notch-color, var(--color-line-strong)) calc(50% - 1px), var(--notch-color, var(--color-line-strong)) 50%, transparent 50%);
+  }
+}
+@utility notch-frame-sm {
+  --notch: 6px;
+}
+
+/* Klavye kısayolu çipi */
+@utility kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 20px;
+  height: 20px;
+  justify-content: center;
+  padding: 0 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--color-cyan);
+  background: rgb(0 240 255 / 0.06);
+  border: 1px solid rgb(0 240 255 / 0.22);
+  border-bottom-color: rgb(0 240 255 / 0.4);
+}
+
+/* Küçük HUD etiketi / rozet */
+@utility hud-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  border: 1px solid var(--color-line-strong);
+  background: rgb(0 240 255 / 0.04);
+}
+
+/* Görünüm geçişi ve açılır pencere animasyonları (azaltılmış harekette kapanır) */
+@utility animate-view {
+  animation: view-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+@utility animate-pop {
+  animation: pop-in 180ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+@utility animate-fade {
+  animation: fade-in 160ms ease-out backwards;
+}
+@utility animate-rise {
+  animation: view-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
 }
 
 @utility glass {
@@ -142,6 +226,41 @@
     background: rgb(255 46 136 / 0.45);
     color: #fff;
   }
+  /* Neon onay kutusu: 16px kare, işaretliyken cyan dolgu + koyu tik (14:1). Kenar cyan/50 ≥ 3:1. */
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-grid;
+    place-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid rgb(0 240 255 / 0.5);
+    background: rgb(3 4 9 / 0.7);
+    cursor: pointer;
+    transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  }
+  input[type="checkbox"]::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: var(--color-obsidian-950);
+    clip-path: polygon(14% 44%, 0 65%, 42% 100%, 100% 22%, 84% 6%, 40% 66%);
+    transform: scale(0);
+    transition: transform 120ms ease-out;
+  }
+  input[type="checkbox"]:hover {
+    border-color: var(--color-cyan);
+  }
+  input[type="checkbox"]:checked {
+    background: var(--color-cyan);
+    border-color: var(--color-cyan);
+    box-shadow: 0 0 10px rgb(0 240 255 / 0.4);
+  }
+  input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
   :focus-visible {
     outline: 1px solid var(--color-cyan);
     outline-offset: 2px;
@@ -195,6 +314,68 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Yatay tarama ışığı (AI yazarken, kasa kilit ekranı) */
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.06);
   }
 }
 

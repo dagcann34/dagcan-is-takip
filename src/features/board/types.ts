@@ -48,6 +48,8 @@ export interface BoardData {
   seq: number;
   tasks: Task[];
   links: Link[];
+  /** Tüm değişikliklerin zaman damgalı kaydı (bkz. features/history/history.ts). */
+  history?: import('../history/history').HistoryEvent[];
 }
 
 export const LANES: { status: Status; color: string }[] = [

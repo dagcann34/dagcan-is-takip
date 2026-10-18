@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { listen } from '@tauri-apps/api/event';
 import { Copy, Eye, EyeOff, KeyRound, Lock, Plus, Search, ShieldCheck, Terminal, Trash2, Server, StickyNote, Key, Wand2 } from 'lucide-react';
 import { useT } from '../../i18n';
-import { Button, Field, Input, PageHeader, Panel, Select, Textarea } from '../../components/ui';
+import { Button, EmptyState, Field, IconButton, Input, PageHeader, Panel, Select, Textarea } from '../../components/ui';
 import { isDesktop } from '../../lib/platform';
 import { errorMessage, toast } from '../../lib/toast';
-import { ITEM_KINDS, generatePassword, kindLabel, vault, type ItemKind, type VaultItem, type VaultItemInput, type VaultStatus } from './vaultApi';
+import { ITEM_KINDS, copySensitive, generatePassword, kindLabel, vault, type ItemKind, type VaultItem, type VaultItemInput, type VaultStatus } from './vaultApi';
+import { confirmDialog } from '../../lib/dialog';
 
 const KIND_ICON: Record<ItemKind, typeof Key> = {
   password: KeyRound,
@@ -44,9 +45,17 @@ export function VaultView() {
       <>
         <PageHeader title={t('vault.title')} subtitle={t('vault.subtitleShort')} />
         <div className="px-8">
-          <Panel className="p-6 text-sm text-ink-muted">
-            {t('vault.desktopOnly')}
-            <code className="mt-3 block font-mono text-cyan">npm run tauri dev</code>
+          <Panel className="flex items-start gap-4 p-6">
+            <span className="notch-sm notch-frame notch-frame-sm relative grid size-11 shrink-0 place-items-center border border-line-strong bg-cyan/[0.05] text-cyan">
+              <ShieldCheck className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm leading-relaxed text-ink-muted">{t('vault.desktopOnly')}</p>
+              <code className="notch-sm notch-frame notch-frame-sm relative mt-3 inline-flex items-center gap-2 border border-line-strong bg-obsidian-950/80 px-3 py-1.5 font-mono text-[13px] text-cyan">
+                <Terminal className="size-3.5 text-ink-subtle" />
+                npm run tauri dev
+              </code>
+            </div>
           </Panel>
         </div>
       </>
@@ -54,14 +63,16 @@ export function VaultView() {
   }
 
   if (!status) return null;
-  if (!status.unlocked) return <LockScreen initialized={status.initialized} onDone={refresh} />;
+  if (!status.unlocked) return <LockScreen initialized={status.initialized} needsRecovery={status.needsRecovery} onDone={refresh} />;
   return <VaultBrowser autoLockMinutes={status.autoLockMinutes} onLocked={refresh} />;
 }
 
-function LockScreen({ initialized, onDone }: { initialized: boolean; onDone: () => void }) {
+function LockScreen({ initialized, needsRecovery, onDone }: { initialized: boolean; needsRecovery: boolean; onDone: () => void }) {
   const { t } = useT();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [recovery, setRecovery] = useState('');
+  const [newKey, setNewKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent) {
@@ -72,47 +83,64 @@ function LockScreen({ initialized, onDone }: { initialized: boolean; onDone: () 
     }
     setBusy(true);
     try {
-      if (initialized) await vault.unlock(password);
-      else await vault.init(password);
-      onDone();
+      if (initialized) {
+        await vault.unlock(password, needsRecovery ? recovery : undefined);
+        onDone();
+      } else {
+        // Kurtarma anahtarı yalnızca bir kez gösterilir; kullanıcı kaydettiğini onaylayınca devam edilir.
+        setNewKey(await vault.init(password));
+      }
     } catch (err) {
       toast(errorMessage(err), 'error');
     } finally {
       // Parolayı React durumunda bekletme.
       setPassword('');
       setConfirm('');
+      setRecovery('');
       setBusy(false);
     }
   }
 
+  if (newKey) return <RecoveryKeyPanel recoveryKey={newKey} onDone={() => { setNewKey(null); onDone(); }} />;
+
   return (
-    <div className="grid h-full place-items-center px-6">
-      <Panel className="w-full max-w-md p-8">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="grid size-11 place-items-center notch-sm bg-gradient-to-br from-brand to-cyan">
-            <Lock className="size-5 text-white" />
+    <div className="relative grid h-full place-items-center overflow-hidden px-6">
+      {/* Arka planda soluk hedef halkaları; okunurluğu etkilemez */}
+      <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 size-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan/[0.06]" />
+      <div aria-hidden className="pointer-events-none absolute top-1/2 left-1/2 size-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-magenta/[0.08]" />
+      <Panel className="animate-pop w-full max-w-[420px] p-8">
+        <div className="flex flex-col items-center text-center">
+          <div className="relative mb-5 grid size-20 place-items-center">
+            <span aria-hidden className="notch absolute inset-0 border border-cyan/45 [animation:ring-pulse_3.2s_ease-in-out_infinite]" />
+            <span aria-hidden className="notch-sm absolute inset-[9px] bg-gradient-to-br from-magenta to-cyan shadow-[0_0_24px_rgb(0_240_255/0.35)]" />
+            <Lock className="relative size-7 text-obsidian-950" />
           </div>
-          <div>
-            <h2 className="text-lg font-semibold">{initialized ? t('vault.lockedTitle') : t('vault.createTitle')}</h2>
-            <p className="text-sm text-ink-muted">
-              {initialized ? t('vault.lockedHint') : t('vault.createHint')}
-            </p>
-          </div>
+          <h2 className="text-[22px] leading-tight font-bold tracking-[0.08em] uppercase">{initialized ? t('vault.lockedTitle') : t('vault.createTitle')}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-muted">{initialized ? t('vault.lockedHint') : t('vault.createHint')}</p>
+        </div>
+        <div aria-hidden className="relative my-6 h-px overflow-hidden bg-line">
+          <span className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-cyan to-transparent [animation:sweep_3.2s_linear_infinite]" />
         </div>
         <form onSubmit={submit} className="flex flex-col gap-4">
-          <Field label={t('vault.masterPassword')} hint={initialized ? undefined : t('vault.masterPasswordHint')}>
+          <Field label={t('vault.masterPassword')} hint={initialized ? undefined : t('vault.passwordPolicy')}>
             <Input type="password" autoFocus autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
+          {initialized && needsRecovery && (
+            <Field label={t('vault.recoveryInput')} hint={t('vault.recoveryNeeded')}>
+              <Input autoComplete="off" spellCheck={false} className="font-mono uppercase" value={recovery} onChange={(e) => setRecovery(e.target.value)} />
+            </Field>
+          )}
           {!initialized && (
             <Field label={t('vault.masterPasswordAgain')}>
               <Input type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
             </Field>
           )}
-          <Button variant="primary" type="submit" disabled={busy || password.length === 0}>
-            <ShieldCheck className="size-4" />
+          <Button variant="primary" type="submit" className="mt-1 h-10" disabled={busy || password.length === 0}>
+            <ShieldCheck className={`size-4 ${busy ? 'animate-pulse' : ''}`} />
             {busy ? t('vault.deriving') : initialized ? t('vault.unlock') : t('vault.create')}
           </Button>
         </form>
+        <p className="mt-6 text-center font-mono text-[11px] tracking-wide text-ink-subtle">{t('vault.subtitleShort')}</p>
       </Panel>
     </div>
   );
@@ -125,6 +153,26 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
   const [items, setItems] = useState<VaultItem[]>([]);
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<VaultItemInput | null>(null);
+  const [showKey, setShowKey] = useState<string | null>(null);
+
+  // Notlar listede taşınmaz; düzenleyici açılırken yalnızca bu kayıt için istenir.
+  async function openEditor(item: VaultItem) {
+    let notes = '';
+    try {
+      notes = (item.hasNotes ? await vault.notes(item.id) : '') ?? '';
+    } catch (e) {
+      toast(errorMessage(e), 'error');
+    }
+    setEditing({ id: item.id, kind: item.kind, title: item.title, username: item.username ?? '', host: item.host ?? '', notes, tags: item.tags });
+  }
+
+  async function revealRecovery() {
+    try {
+      setShowKey(await vault.recoveryKey());
+    } catch (e) {
+      toast(errorMessage(e), 'error');
+    }
+  }
   const [revealed, setRevealed] = useState<Record<string, string>>({});
   const [minutes, setMinutes] = useState(autoLockMinutes);
 
@@ -145,7 +193,7 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
     const q = query.trim().toLocaleLowerCase('tr');
     if (!q) return items;
     return items.filter((i) =>
-      [i.title, i.username, i.host, i.notes, ...i.tags].some((v) => v?.toLocaleLowerCase('tr').includes(q)),
+      [i.title, i.username, i.host, ...i.tags].some((v) => v?.toLocaleLowerCase('tr').includes(q)),
     );
   }, [items, query]);
 
@@ -174,7 +222,7 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
   }
 
   async function remove(item: VaultItem) {
-    if (!confirm(t('vault.confirmDelete', { title: item.title }))) return;
+    if (!(await confirmDialog(t('vault.confirmDelete', { title: item.title }), { danger: true, confirmLabel: t('common.delete') }))) return;
     await vault.remove(item.id).catch((e) => toast(errorMessage(e), 'error'));
     load();
   }
@@ -195,6 +243,8 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
     setRevealed({});
     onLocked();
   }
+
+  if (showKey) return <RecoveryKeyPanel recoveryKey={showKey} onDone={() => setShowKey(null)} />;
 
   return (
     <div className="flex h-full flex-col">
@@ -219,6 +269,9 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
                 </option>
               ))}
             </Select>
+            <IconButton title={t('vault.recoveryShow')} aria-label={t('vault.recoveryShow')} onClick={revealRecovery}>
+              <KeyRound />
+            </IconButton>
             <Button onClick={lock}>
               <Lock className="size-4" /> {t('vault.lock')}
             </Button>
@@ -230,51 +283,76 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
       />
       <div className="flex min-h-0 flex-1 gap-5 px-8 pb-8">
         <Panel className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-            <Search className="size-4 text-ink-subtle" />
+          <label className="group/search flex h-12 shrink-0 items-center gap-3 border-b border-line px-4 transition-colors focus-within:border-cyan/45 focus-within:bg-cyan/[0.03]">
+            <Search className="size-4 text-ink-subtle transition-colors group-focus-within/search:text-cyan" />
             <input
-              className="flex-1 bg-transparent text-sm outline-none placeholder:text-ink-subtle"
+              className="h-full flex-1 bg-transparent text-sm outline-none placeholder:text-ink-subtle focus-visible:shadow-none focus-visible:outline-none"
               placeholder={t('vault.search')}
+              aria-label={t('vault.search')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-          </div>
+            <span aria-hidden className="font-mono text-[11px] text-ink-subtle tabular-nums">
+              {filtered.length}/{items.length}
+            </span>
+          </label>
           <ul className="flex-1 divide-y divide-line overflow-auto">
             {filtered.map((item) => {
               const Icon = KIND_ICON[item.kind];
               const shown = revealed[item.id];
               return (
-                <li key={item.id} className="group flex items-start gap-4 px-4 py-3.5 hover:bg-white/[0.03]">
-                  <div className="mt-0.5 grid size-9 shrink-0 place-items-center bg-navy-700 text-cyan">
+                <li
+                  key={item.id}
+                  className={`group relative flex items-start gap-4 px-4 py-3.5 transition-colors hover:bg-cyan/[0.035] ${editing?.id === item.id ? 'bg-cyan/[0.05]' : ''}`}
+                >
+                  <span
+                    aria-hidden
+                    className={`absolute inset-y-2 left-0 w-[2px] transition-colors ${
+                      editing?.id === item.id ? 'bg-magenta shadow-[0_0_8px_rgb(255_46_136/0.8)]' : 'bg-transparent group-hover:bg-cyan/60'
+                    }`}
+                  />
+                  <div className="notch-sm notch-frame notch-frame-sm relative mt-0.5 grid size-9 shrink-0 place-items-center border border-line-strong bg-navy-700/70 text-cyan transition-shadow group-hover:shadow-[0_0_12px_rgb(0_240_255/0.18)]">
                     <Icon className="size-4" />
                   </div>
-                  <button className="min-w-0 flex-1 text-left" onClick={() => setEditing({ ...item, username: item.username ?? '', host: item.host ?? '', notes: item.notes ?? '' })}>
-                    <div className="flex items-center gap-2">
-                      <span className="truncate font-medium">{item.title}</span>
-                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[11px] text-ink-muted">{kindLabel(item.kind)}</span>
+                  <button className="min-w-0 flex-1 text-left" onClick={() => openEditor(item)}>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span className="truncate font-medium text-ink">{item.title}</span>
+                      <span className="hud-chip shrink-0">{kindLabel(item.kind)}</span>
                     </div>
-                    <div className="mt-0.5 truncate text-xs text-ink-subtle">
+                    <div className="mt-1 truncate font-mono text-xs text-ink-subtle">
                       {[item.username, item.host].filter(Boolean).join(' @ ') || item.tags.join(', ') || '—'}
                     </div>
                     {shown !== undefined && (
-                      <pre className="mt-2 max-h-48 overflow-auto bg-obsidian-950 p-3 font-mono text-xs whitespace-pre-wrap text-ink">{shown || t('vault.empty')}</pre>
+                      <pre className="notch-sm animate-fade mt-2.5 max-h-48 overflow-auto border border-cyan/30 bg-obsidian-950/90 p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap text-ink shadow-[inset_0_0_18px_rgb(0_240_255/0.06)]">
+                        {shown || t('vault.empty')}
+                      </pre>
                     )}
                   </button>
-                  <div className="flex shrink-0 gap-1 opacity-70 group-hover:opacity-100">
-                    <Button variant="ghost" title={t('vault.reveal')} onClick={() => toggleReveal(item.id)}>
-                      {shown !== undefined ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                    <Button variant="ghost" title={t('vault.copyTitle')} onClick={() => copy(item.id)}>
-                      <Copy className="size-4" />
-                    </Button>
-                    <Button variant="ghost" title={t('common.delete')} onClick={() => remove(item)}>
-                      <Trash2 className="size-4" />
-                    </Button>
+                  <div className="flex shrink-0 items-center gap-0.5 opacity-80 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                    <IconButton
+                      title={t('vault.reveal')}
+                      aria-label={t('vault.reveal')}
+                      aria-pressed={shown !== undefined}
+                      className={shown !== undefined ? 'border-cyan/40 bg-cyan/[0.07] text-cyan' : ''}
+                      onClick={() => toggleReveal(item.id)}
+                    >
+                      {shown !== undefined ? <EyeOff /> : <Eye />}
+                    </IconButton>
+                    <IconButton title={t('vault.copyTitle')} aria-label={t('vault.copyTitle')} onClick={() => copy(item.id)}>
+                      <Copy />
+                    </IconButton>
+                    <IconButton tone="danger" title={t('common.delete')} aria-label={t('common.delete')} onClick={() => remove(item)}>
+                      <Trash2 />
+                    </IconButton>
                   </div>
                 </li>
               );
             })}
-            {filtered.length === 0 && <li className="px-4 py-10 text-center text-sm text-ink-subtle">{t('common.none')}</li>}
+            {filtered.length === 0 && (
+              <li>
+                <EmptyState icon={query.trim() ? <Search /> : <ShieldCheck />}>{t('common.none')}</EmptyState>
+              </li>
+            )}
           </ul>
         </Panel>
         {editing && <ItemEditor key={editing.id ?? 'new'} value={editing} onCancel={() => setEditing(null)} onSave={save} />}
@@ -288,6 +366,7 @@ function ItemEditor({ value, onSave, onCancel }: { value: VaultItemInput; onSave
   const [v, setV] = useState<VaultItemInput>({ ...value, secret: '' });
   const [tags, setTags] = useState(value.tags.join(', '));
   const isNew = !value.id;
+  const EditorIcon = KIND_ICON[v.kind];
   const set = <K extends keyof VaultItemInput>(k: K, val: VaultItemInput[K]) => setV((s) => ({ ...s, [k]: val }));
 
   function submit(e: FormEvent) {
@@ -300,9 +379,15 @@ function ItemEditor({ value, onSave, onCancel }: { value: VaultItemInput; onSave
   }
 
   return (
-    <Panel className="w-[400px] shrink-0 overflow-auto p-5">
-      <form onSubmit={submit} className="flex flex-col gap-4">
-        <h3 className="font-semibold">{isNew ? t('vault.editorNew') : t('vault.editorEdit')}</h3>
+    <Panel className="animate-pop flex w-[400px] shrink-0 flex-col overflow-hidden">
+      <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+        <div className="flex shrink-0 items-center gap-3 border-b border-line px-5 py-3.5">
+          <span className="notch-sm grid size-8 place-items-center bg-gradient-to-br from-magenta/25 to-cyan/20 text-cyan">
+            <EditorIcon className="size-4" />
+          </span>
+          <h3 className="min-w-0 flex-1 truncate text-[16px] font-bold tracking-[0.08em] uppercase">{isNew ? t('vault.editorNew') : t('vault.editorEdit')}</h3>
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-5">
         <Field label={t('vault.kind')}>
           <Select value={v.kind} onChange={(e) => set('kind', e.target.value as ItemKind)}>
             {ITEM_KINDS.map((k) => (
@@ -333,7 +418,9 @@ function ItemEditor({ value, onSave, onCancel }: { value: VaultItemInput; onSave
               <Input type="password" autoComplete="off" value={v.secret ?? ''} onChange={(e) => set('secret', e.target.value)} />
               <Button
                 type="button"
+                className="w-9 px-0"
                 title={t('vault.generate')}
+                aria-label={t('vault.generate')}
                 onClick={() => {
                   const pw = generatePassword(24);
                   set('secret', pw);
@@ -351,15 +438,54 @@ function ItemEditor({ value, onSave, onCancel }: { value: VaultItemInput; onSave
         <Field label={t('vault.tags')} hint={t('vault.tagsHint')}>
           <Input value={tags} onChange={(e) => setTags(e.target.value)} />
         </Field>
-        <div className="flex justify-end gap-2 pt-2">
+        </div>
+        <div className="flex shrink-0 justify-end gap-2 border-t border-line bg-obsidian-950/40 px-5 py-3">
           <Button type="button" variant="ghost" onClick={onCancel}>
             {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary">
-            {t('vault.encryptSave')}
+            <Lock className="size-4" /> {t('vault.encryptSave')}
           </Button>
         </div>
       </form>
     </Panel>
+  );
+}
+
+/** Kurtarma anahtarını gösterir; kopyalama güvenli panodan yapılır ve süreli temizlenir. */
+function RecoveryKeyPanel({ recoveryKey, onDone }: { recoveryKey: string; onDone: () => void }) {
+  const { t } = useT();
+  return (
+    <div className="relative grid h-full place-items-center overflow-hidden px-6">
+      <Panel className="animate-pop w-full max-w-[560px] p-8">
+        <div className="flex items-center gap-3">
+          <span className="notch-sm grid size-10 place-items-center border border-volt/60 bg-volt/10 text-volt">
+            <KeyRound className="size-5" />
+          </span>
+          <h2 className="text-[22px] font-bold tracking-[0.08em] uppercase">{t('vault.recoveryTitle')}</h2>
+        </div>
+        <p className="mt-4 text-sm leading-relaxed text-ink-muted">{t('vault.recoveryHint')}</p>
+        <div className="notch-sm mt-5 border border-volt/50 bg-obsidian-950/80 px-4 py-3 text-center font-mono text-[15px] leading-relaxed tracking-wider break-all text-volt">
+          {recoveryKey}
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button
+            onClick={async () => {
+              try {
+                await copySensitive(recoveryKey);
+                toast(t('common.copied'));
+              } catch (e) {
+                toast(errorMessage(e), 'error');
+              }
+            }}
+          >
+            <Copy className="size-4" /> {t('vault.copyRecovery')}
+          </Button>
+          <Button variant="primary" onClick={onDone}>
+            {t('vault.recoverySaved')}
+          </Button>
+        </div>
+      </Panel>
+    </div>
   );
 }

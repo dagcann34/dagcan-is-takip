@@ -1,7 +1,7 @@
 {
-  "name": "dagcan-is-takip",
+  "name": "kanvault",
   "private": true,
-  "version": "0.5.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource/caveat": "^5.3.0",
     "@fontsource/rajdhani": "^5.3.0",
     "@tauri-apps/api": "^2.12.4",
     "@tauri-apps/plugin-autostart": "^2.7.0",
@@ -33,5 +34,8 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
-  }
+  },
+  "description": "Kanvault — free, open-source Task & Security Hub. Developed by Dağcan Nural.",
+  "author": "Dağcan Nural",
+  "license": "MIT"
 }

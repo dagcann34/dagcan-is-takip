@@ -3,7 +3,7 @@
 ## 🇬🇧 Reporting a vulnerability
 
 Please **do not open a public issue** for security problems. Use GitHub's
-[private vulnerability reporting](https://github.com/dagcann34/dagcan-is-takip/security/advisories/new)
+[private vulnerability reporting](https://github.com/dagcann34/kanvault/security/advisories/new)
 and include steps to reproduce, affected version and impact. You will get a reply within 7 days.
 
 Scope that matters most: the vault (`src-tauri/src/crypto.rs`, `vault.rs`), the IPC surface
@@ -12,7 +12,7 @@ Scope that matters most: the vault (`src-tauri/src/crypto.rs`, `vault.rs`), the 
 ## 🇹🇷 Güvenlik açığı bildirme
 
 Güvenlik sorunları için lütfen **herkese açık issue açma**. GitHub'ın
-[özel güvenlik açığı bildirimini](https://github.com/dagcann34/dagcan-is-takip/security/advisories/new)
+[özel güvenlik açığı bildirimini](https://github.com/dagcann34/kanvault/security/advisories/new)
 kullan; yeniden üretme adımlarını, etkilenen sürümü ve etkiyi ekle. 7 gün içinde yanıt verilir.
 
 En önemli kapsam: kasa (`src-tauri/src/crypto.rs`, `vault.rs`), IPC yüzeyi
@@ -22,5 +22,5 @@ En önemli kapsam: kasa (`src-tauri/src/crypto.rs`, `vault.rs`), IPC yüzeyi
 
 | Version | Supported |
 |---|---|
-| 0.2.x | ✅ |
-| < 0.2 | ❌ |
+| 1.x | ✅ |
+| < 1.0 | ❌ |

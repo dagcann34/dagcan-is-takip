@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-board-import-encrypted"
+description = "Enables the board_import_encrypted command without any pre-configured scope."
+commands.allow = ["board_import_encrypted"]
+
+[[permission]]
+identifier = "deny-board-import-encrypted"
+description = "Denies the board_import_encrypted command without any pre-configured scope."
+commands.deny = ["board_import_encrypted"]

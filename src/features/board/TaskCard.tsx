@@ -44,8 +44,8 @@ export const TaskCard = memo(function TaskCard({
     e.stopPropagation();
     if (!ref.current) return;
     try {
-      const { path, copied } = await shareCard(ref.current, task.key);
-      toast(copied ? t('board.sharedCopied', { path }) : t('board.shared', { path }));
+      const path = await shareCard(ref.current, task.key);
+      if (path) toast(t('board.shared', { path }));
     } catch (err) {
       toast(errorMessage(err), 'error');
     }
@@ -72,10 +72,10 @@ export const TaskCard = memo(function TaskCard({
         } else if (e.key === 'ArrowLeft' && e.altKey) onMove(task.id, -1);
         else if (e.key === 'ArrowRight' && e.altKey) onMove(task.id, 1);
       }}
-      className={`group notch relative cursor-pointer border bg-navy-800/90 transition-all duration-150 select-none ${
+      className={`group notch notch-frame relative cursor-pointer border bg-navy-800/90 transition-[background-color,border-color,box-shadow] duration-150 select-none focus-visible:border-cyan/80 focus-visible:bg-navy-700/90 focus-visible:outline-none focus-visible:[--notch-color:rgb(0_240_255/0.8)] ${
         selected
-          ? 'border-cyan/80 shadow-[0_0_0_1px_rgb(0_240_255/0.5),0_0_24px_rgb(0_240_255/0.25)]'
-          : 'border-line hover:border-cyan/45 hover:bg-navy-700/90 hover:shadow-[0_0_18px_rgb(0_240_255/0.12)]'
+          ? 'border-cyan/80 bg-navy-700/90 shadow-[0_0_0_1px_rgb(0_240_255/0.5),0_0_24px_rgb(0_240_255/0.25)] [--notch-color:rgb(0_240_255/0.8)]'
+          : 'border-line hover:border-cyan/45 hover:bg-navy-700/90 hover:shadow-[0_0_18px_rgb(0_240_255/0.12)] hover:[--notch-color:rgb(0_240_255/0.45)]'
       }`}
     >
       {/* Durum şeridi */}
@@ -91,7 +91,7 @@ export const TaskCard = memo(function TaskCard({
           </span>
           {task.recurrence && <Repeat className="size-3 text-cyan" aria-label={recurrenceLabel(task.recurrence)} />}
           <button
-            className="ml-auto grid size-6 place-items-center text-ink-subtle opacity-0 transition-opacity group-hover:opacity-100 hover:text-cyan focus-visible:opacity-100"
+            className="ml-auto grid size-6 place-items-center border border-transparent text-ink-subtle opacity-0 transition-all group-hover:opacity-100 group-focus-visible:opacity-100 hover:border-cyan/50 hover:text-cyan focus-visible:opacity-100 active:translate-y-px"
             title={t('board.shareCard')}
             onClick={share}
           >
@@ -139,7 +139,7 @@ export const TaskCard = memo(function TaskCard({
               title={t('board.moveLeft')}
               disabled={laneIndex === 0}
               onClick={stop(() => onMove(task.id, -1))}
-              className="grid size-6 place-items-center border border-transparent text-ink-subtle opacity-0 transition-all group-hover:opacity-100 hover:border-cyan/50 hover:text-cyan focus-visible:opacity-100 disabled:pointer-events-none disabled:opacity-0"
+              className="grid size-6 place-items-center border border-transparent text-ink-subtle opacity-0 transition-all group-hover:opacity-100 hover:border-cyan/50 hover:bg-cyan/[0.07] hover:text-cyan group-focus-visible:opacity-100 focus-visible:opacity-100 active:translate-y-px disabled:pointer-events-none disabled:opacity-0"
             >
               <ChevronLeft className="size-3.5" />
             </button>
@@ -148,7 +148,7 @@ export const TaskCard = memo(function TaskCard({
               title={t('board.moveRight')}
               disabled={laneIndex === LANES.length - 1}
               onClick={stop(() => onMove(task.id, 1))}
-              className="grid size-6 place-items-center border border-transparent text-ink-subtle opacity-0 transition-all group-hover:opacity-100 hover:border-cyan/50 hover:text-cyan focus-visible:opacity-100 disabled:pointer-events-none disabled:opacity-0"
+              className="grid size-6 place-items-center border border-transparent text-ink-subtle opacity-0 transition-all group-hover:opacity-100 hover:border-cyan/50 hover:bg-cyan/[0.07] hover:text-cyan group-focus-visible:opacity-100 focus-visible:opacity-100 active:translate-y-px disabled:pointer-events-none disabled:opacity-0"
             >
               <ChevronRight className="size-3.5" />
             </button>

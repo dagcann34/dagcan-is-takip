@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { FileDown, FileImage, FileType2, LayoutTemplate, Link2, Pause, Play, Plus, Repeat, RotateCcw, Search, Trash2, X } from 'lucide-react';
+import { FileDown, FileImage, LayoutTemplate, Link2, Pause, Play, Plus, Repeat, RotateCcw, Search, Trash2, X } from 'lucide-react';
 import { Button, Field, Input, Select, Textarea } from '../../components/ui';
 import { useT } from '../../i18n';
 import { errorMessage, toast } from '../../lib/toast';
@@ -130,7 +130,7 @@ export function Board({ focusTaskId, onEditingChange }: { focusTaskId?: string |
   async function runExport(format: ExportFormat) {
     try {
       const path = await exportBoard(gridRef.current, format);
-      toast(t('board.exported', { path }));
+      if (path) toast(t('board.exported', { path }));
     } catch (e) {
       toast(errorMessage(e), 'error');
     }
@@ -164,9 +164,6 @@ export function Board({ focusTaskId, onEditingChange }: { focusTaskId?: string |
             <div className="flex shrink-0 items-center gap-1">
               <Button variant="ghost" onClick={() => runExport('png')} title={t('board.exportPng')}>
                 <FileImage className="size-4" /> PNG
-              </Button>
-              <Button variant="ghost" onClick={() => runExport('svg')} title={t('board.exportSvg')}>
-                <FileType2 className="size-4" /> SVG
               </Button>
               <Button variant="ghost" onClick={() => runExport('pdf')} title={t('board.exportPdf')}>
                 <FileDown className="size-4" /> PDF

@@ -30,13 +30,23 @@ pub struct AiResult {
 
 #[tauri::command]
 pub async fn ai_generate(state: State<'_, VaultState>, req: AiRequest) -> Result<AiResult, String> {
+    // Girdi sınırları: maliyet ve kötüye kullanım koruması.
+    if req.system.len() + req.prompt.len() > 400_000 {
+        return Err("err.board.too_large".into());
+    }
+    let effort = match req.effort.as_deref() {
+        Some("low") => "low",
+        Some("high") => "high",
+        _ => "medium",
+    };
+    let max_tokens = req.max_tokens.unwrap_or(16000).clamp(256, 16000);
     // Anahtar kilit altında okunur, istek öncesi kilit bırakılır.
     let key = state.anthropic_key()?;
 
     let body = json!({
         "model": MODEL,
-        "max_tokens": req.max_tokens.unwrap_or(16000),
-        "output_config": { "effort": req.effort.as_deref().unwrap_or("medium") },
+        "max_tokens": max_tokens,
+        "output_config": { "effort": effort },
         // Güvenlik sınıflandırıcısı reddederse sunucu tarafında önerilen modele düşer.
         "fallbacks": "default",
         "system": req.system,

@@ -30,8 +30,11 @@ export interface PromptPair {
   prompt: string;
 }
 
+/** Görev metnindeki açılı ayraçları kaçırır: kullanıcı verisi prompt'taki XML etiketlerini kapatamaz. */
+const escapeXml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 function taskXml(tasks: Task[], redact: boolean): string {
-  const clean = (s?: string) => (s ? (redact ? redactSensitive(s) : s).trim() : '');
+  const clean = (s?: string) => (s ? escapeXml((redact ? redactSensitive(s) : s).trim()) : '');
   return tasks
     .map((t) =>
       [

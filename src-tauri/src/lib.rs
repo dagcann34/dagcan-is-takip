@@ -1,5 +1,10 @@
 mod ai;
+mod board;
 mod crypto;
+mod keychain;
+mod secure_clipboard;
+mod secure_fs;
+mod settings;
 mod vault;
 
 use std::fs;
@@ -54,7 +59,7 @@ struct TrayLabels {
 impl Default for TrayLabels {
     fn default() -> Self {
         Self {
-            open: "Dağcan İş Takip'i Aç".into(),
+            open: "Kanvault'u Aç".into(),
             quick: "Hızlı Görev Ekle".into(),
             lock: "Kasayı Kilitle".into(),
             quit: "Çıkış".into(),
@@ -74,7 +79,7 @@ fn tray_menu(app: &AppHandle, l: &TrayLabels) -> tauri::Result<Menu<tauri::Wry>>
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let menu = tray_menu(app, &TrayLabels::default())?;
     let mut tray = TrayIconBuilder::with_id("main-tray")
-        .tooltip("Dağcan İş Takip")
+        .tooltip("Kanvault")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "open" => show_main(app),
@@ -106,50 +111,89 @@ fn set_tray_labels(app: AppHandle, labels: TrayLabels) -> Result<(), String> {
     Ok(())
 }
 
-/// Pano/kart dışa aktarımlarını İndirilenler klasörüne yazar ve tam yolu döner.
+/// İzin verilen dışa aktarma türleri ve üst sınır (base64 öncesi 50 MiB).
+const EXPORT_EXTENSIONS: &[&str] = &["png", "pdf", "ics", "kvb"];
+const EXPORT_MAX_BYTES: usize = 50 << 20;
+
+/// Dışa aktarımları İndirilenler klasörüne yazar: yalnızca izinli uzantılar, boyut sınırı,
+/// var olan dosyanın üzerine yazmadan yeni ad, 0600 izin ve sembolik bağ izlememe.
 #[tauri::command]
 fn save_export(app: AppHandle, file_name: String, base64: String) -> Result<String, String> {
+    if base64.len() > EXPORT_MAX_BYTES / 3 * 4 + 4 {
+        return Err("err.board.too_large".into());
+    }
     let safe_name = Path::new(&file_name)
         .file_name()
         .and_then(|n| n.to_str())
-        .filter(|n| !n.starts_with('.'))
+        .filter(|n| !n.starts_with('.') && n.len() <= 120)
         .ok_or("err.export.bad_name")?
         .to_string();
+    let ext = Path::new(&safe_name).extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).unwrap_or_default();
+    if !EXPORT_EXTENSIONS.contains(&ext.as_str()) {
+        return Err("err.export.bad_name".into());
+    }
     let dir = app.path().download_dir().map_err(|e| e.to_string())?;
     let bytes = B64.decode(base64).map_err(|e| e.to_string())?;
-    let target = dir.join(safe_name);
-    fs::write(&target, bytes).map_err(|e| format!("err.export.write::{e}"))?;
+    let target = secure_fs::unique_path(&dir, &safe_name);
+    secure_fs::write_new_private(&target, &bytes).map_err(|e| format!("err.export.write::{e}"))?;
     Ok(target.to_string_lossy().into_owned())
 }
 
-fn board_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
-    Ok(app.path().app_data_dir().map_err(|e| e.to_string())?.join("board.json"))
-}
-
-/// Pano verisini uygulama veri klasöründen okur (yoksa None). Pano hassas veri içermez; sırlar kasadadır.
+/// AI çıktısı gibi kullanıcının bilerek kopyaladığı metni güvenli panoya yazar; 2 dk sonra temizler.
 #[tauri::command]
-fn board_load(app: AppHandle) -> Result<Option<String>, String> {
-    let path = board_path(&app)?;
-    if !path.exists() {
-        return Ok(None);
+fn copy_sensitive_text(app: AppHandle, text: String) -> Result<u64, String> {
+    if text.len() > 1 << 20 {
+        return Err("err.board.too_large".into());
     }
-    fs::read_to_string(path).map(Some).map_err(|e| format!("err.export.write::{e}"))
+    let text = zeroize::Zeroizing::new(text);
+    secure_clipboard::write_with_expiry(app, &text, std::time::Duration::from_secs(120))?;
+    Ok(120)
 }
 
-/// Pano verisini atomik olarak yazar.
+/// Eski sürümlerin WebView depolamasında (localStorage) kalmış düz metin pano verisini bir kez siler.
 #[tauri::command]
-fn board_save(app: AppHandle, data: String) -> Result<(), String> {
-    serde_json::from_str::<serde_json::Value>(&data).map_err(|e| format!("err.vault.corrupt::{e}"))?;
-    let path = board_path(&app)?;
-    let tmp = path.with_extension("json.tmp");
-    fs::write(&tmp, data).map_err(|e| format!("err.export.write::{e}"))?;
-    fs::rename(&tmp, &path).map_err(|e| format!("err.export.write::{e}"))
+fn wipe_legacy_web_data(app: AppHandle) -> Result<bool, String> {
+    let marker = app.path().app_data_dir().map_err(|e| e.to_string())?.join(".legacy-wiped");
+    if marker.exists() {
+        return Ok(false);
+    }
+    if let Some(w) = app.get_webview_window("main") {
+        w.clear_all_browsing_data().map_err(|e| e.to_string())?;
+    }
+    secure_fs::write_private(&marker, b"1").map_err(|e| e.to_string())?;
+    Ok(true)
+}
+
+fn apply_content_protection(app: &AppHandle, enabled: bool) -> Result<(), String> {
+    for (_, w) in app.webview_windows() {
+        w.set_content_protected(enabled).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+/// Ekran görüntüsü / ekran kaydı korumasını açar veya kapatır (macOS: NSWindow.sharingType = none,
+/// Windows: WDA_EXCLUDEFROMCAPTURE). Ayar Rust tarafında saklanır; kapatmak için kasa varsa
+/// açık olması gerekir (WebView'den kendiliğinden kapatılamaz).
+#[tauri::command]
+fn set_content_protection(app: AppHandle, enabled: bool) -> Result<(), String> {
+    if !enabled {
+        let vault = app.state::<VaultState>();
+        if vault.exists() && !vault.is_unlocked() {
+            return Err("err.settings.unlock_required".into());
+        }
+    }
+    apply_content_protection(&app, enabled)?;
+    settings::update(&app, |s| s.content_protection = enabled)
+}
+
+#[tauri::command]
+fn get_content_protection(app: AppHandle) -> bool {
+    settings::load(&app).content_protection
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_autostart::init(
@@ -169,8 +213,14 @@ pub fn run() {
             let data_dir = app.path().app_data_dir()?;
             fs::create_dir_all(&data_dir)?;
             app.manage(VaultState::new(data_dir.join("vault.dgv")));
+            app.manage(board::BoardState::default());
+            // Eski sürümlerden kalan hassas dosyaların izinlerini daralt.
+            let _ = secure_fs::restrict(&data_dir.join("vault.dgv"));
+            let _ = secure_fs::restrict(&data_dir.join("board.json"));
             vault::spawn_auto_lock(app.handle().clone());
             build_tray(app.handle())?;
+            // Kayıtlı ekran koruması tercihini uygula (varsayılan: açık).
+            let _ = apply_content_protection(app.handle(), settings::load(app.handle()).content_protection);
             // Girişte otomatik başlatıldıysa yalnızca tepside/menü çubuğunda başla.
             if std::env::args().any(|a| a == "--minimized") {
                 if let Some(w) = app.get_webview_window("main") {
@@ -200,8 +250,16 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_export,
             set_tray_labels,
-            board_load,
-            board_save,
+            set_content_protection,
+            get_content_protection,
+            copy_sensitive_text,
+            wipe_legacy_web_data,
+            vault::vault_item_notes,
+            vault::vault_recovery_key,
+            board::board_load,
+            board::board_save,
+            board::board_export_encrypted,
+            board::board_import_encrypted,
             vault::vault_export_backup,
             vault::vault_status,
             vault::vault_init,
@@ -217,5 +275,5 @@ pub fn run() {
             ai::ai_generate,
         ])
         .run(tauri::generate_context!())
-        .expect("Dağcan İş Takip başlatılamadı");
+        .expect("Kanvault could not start");
 }

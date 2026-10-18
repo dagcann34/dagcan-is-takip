@@ -1,5 +1,6 @@
-import { AlertTriangle, CalendarClock, CheckCircle2, CircleDot, Ban, Timer } from 'lucide-react';
-import { PageHeader, Panel } from '../../components/ui';
+import type { CSSProperties } from 'react';
+import { AlertTriangle, CalendarCheck, CalendarClock, CheckCircle2, CircleDot, Ban, Timer } from 'lucide-react';
+import { EmptyState, PageHeader, Panel, SectionTitle } from '../../components/ui';
 import { useT } from '../../i18n';
 import { useNow } from '../../lib/useNow';
 import { useBoard } from '../board/boardStore';
@@ -50,21 +51,28 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
       />
       <div className="@container flex flex-col gap-5 px-8 pb-8">
         <div className="grid grid-cols-2 gap-4 @2xl:grid-cols-3 @5xl:grid-cols-6">
-          {kpis.map(({ label, value, icon: Icon, color }) => (
-            <Panel key={label} className="p-4">
-              <div className="flex items-center justify-between">
-                <span className="hud-label text-[11px]!">{label}</span>
-                <Icon className="size-4" style={{ color }} />
-              </div>
-              <div className="font-display mt-3 text-[34px] leading-none font-bold tabular-nums" style={{ color, textShadow: `0 0 14px ${color}66` }}>
-                {value}
-              </div>
-            </Panel>
+          {kpis.map(({ label, value, icon: Icon, color }, i) => (
+            <div key={label} className="animate-rise group" style={{ '--i': i } as CSSProperties}>
+              <Panel className="h-full p-4 transition-[border-color,box-shadow] duration-200 group-hover:border-line-strong! group-hover:shadow-[0_0_22px_rgb(0_240_255/0.08),var(--shadow-glass)]!">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-40 transition-opacity duration-200 group-hover:opacity-90"
+                  style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <span className="hud-label truncate text-[11px]!">{label}</span>
+                  <Icon className="size-4 shrink-0" style={{ color }} />
+                </div>
+                <div className="font-display mt-3 text-[34px] leading-none font-bold tabular-nums" style={{ color, textShadow: `0 0 14px ${color}55` }}>
+                  {value}
+                </div>
+              </Panel>
+            </div>
           ))}
         </div>
 
         <Panel className="p-5">
-          <div className="hud-label mb-3">{t('overview.distribution')}</div>
+          <SectionTitle className="mb-3">{t('overview.distribution')}</SectionTitle>
           <div className="flex h-2.5 gap-0.5 overflow-hidden bg-white/5">
             {LANES.map((l) => {
               const n = tasks.filter((x) => x.status === l.status).length;
@@ -83,18 +91,34 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
 
         <div className="grid grid-cols-1 gap-5 @3xl:grid-cols-2">
           <Panel className="p-5">
-            <div className="hud-label mb-3">{t('overview.upcoming')}</div>
-            {upcoming.length === 0 && <p className="py-6 text-center text-sm text-ink-subtle">{t('overview.noUpcoming')}</p>}
-            <ul className="divide-y divide-line">
+            <SectionTitle className="mb-2" icon={<CalendarClock />}>
+              {t('overview.upcoming')}
+            </SectionTitle>
+            {upcoming.length === 0 && (
+              <EmptyState icon={<CalendarCheck />} className="py-6">
+                {t('overview.noUpcoming')}
+              </EmptyState>
+            )}
+            <ul className="-mx-2 divide-y divide-line">
               {upcoming.map((x) => {
                 const due = dueInfo(x);
                 return (
                   <li key={x.id}>
-                    <button onClick={() => onOpenTask(x.id)} className="flex w-full items-center gap-3 py-2.5 text-left hover:text-cyan">
-                      <span className="size-2 shrink-0 rounded-full" style={{ background: PRIORITY[x.priority].color }} title={priorityLabel(x.priority)} />
-                      <span className="w-16 shrink-0 text-xs text-ink-subtle">{x.key}</span>
-                      <span className="min-w-0 flex-1 truncate text-sm">{x.title}</span>
-                      <span className={`shrink-0 text-xs ${due?.tone === 'overdue' ? 'text-danger' : due?.tone === 'soon' ? 'text-warning' : 'text-ink-muted'}`}>{due?.label}</span>
+                    <button onClick={() => onOpenTask(x.id)} className="group/row flex w-full items-center gap-3 px-2 py-2.5 text-left transition-colors hover:bg-cyan/[0.04]">
+                      <span className="size-2 shrink-0 rotate-45" style={{ background: PRIORITY[x.priority].color, boxShadow: `0 0 6px ${PRIORITY[x.priority].color}` }} title={priorityLabel(x.priority)} />
+                      <span className="w-16 shrink-0 font-mono text-xs text-ink-subtle">{x.key}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm transition-colors group-hover/row:text-cyan">{x.title}</span>
+                      <span
+                        className={`shrink-0 border px-1.5 py-0.5 text-[11px] font-medium ${
+                          due?.tone === 'overdue'
+                            ? 'border-danger/45 bg-danger/10 text-danger'
+                            : due?.tone === 'soon'
+                              ? 'border-volt/40 bg-volt/10 text-volt'
+                              : 'border-line bg-white/[0.03] text-ink-muted'
+                        }`}
+                      >
+                        {due?.label}
+                      </span>
                     </button>
                   </li>
                 );
@@ -103,29 +127,40 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
           </Panel>
           <Panel className="p-5">
             {running.length > 0 && (
-              <div className="notch-sm mb-4 border border-cyan/40 bg-cyan/10 p-3">
-                <div className="text-xs font-medium text-cyan">{t('overview.running')}</div>
+              <div className="notch-sm notch-frame notch-frame-sm relative mb-4 border border-cyan/40 bg-cyan/[0.08] p-3 [--notch-color:rgb(0_240_255/0.4)]">
+                <div className="flex items-center gap-2 text-xs font-semibold text-cyan">
+                  <span className="size-1.5 animate-pulse rounded-full bg-cyan shadow-[0_0_6px_rgb(0_240_255)]" />
+                  {t('overview.running')}
+                </div>
                 {running.map((x) => (
-                  <button key={x.id} onClick={() => onOpenTask(x.id)} className="mt-1 flex w-full justify-between text-sm">
+                  <button key={x.id} onClick={() => onOpenTask(x.id)} className="mt-1.5 flex w-full items-center justify-between gap-3 text-left text-sm hover:text-cyan">
                     <span className="truncate">{x.title}</span>
-                    <span className="font-mono tabular-nums">{formatDuration(totalTime(x, now))}</span>
+                    <span className="font-mono text-cyan tabular-nums">{formatDuration(totalTime(x, now))}</span>
                   </button>
                 ))}
               </div>
             )}
-            <div className="hud-label mb-3">{t('overview.recentDone')}</div>
-            <ul className="divide-y divide-line">
+            <SectionTitle className="mb-2" icon={<CheckCircle2 />}>
+              {t('overview.recentDone')}
+            </SectionTitle>
+            <ul className="-mx-2 divide-y divide-line">
               {recentDone.map((x) => (
                 <li key={x.id}>
-                  <button onClick={() => onOpenTask(x.id)} className="flex w-full flex-col py-2.5 text-left hover:text-cyan">
-                    <span className="truncate text-sm">
-                      <span className="text-ink-subtle">{x.key}</span> {x.title}
+                  <button onClick={() => onOpenTask(x.id)} className="group/row flex w-full flex-col gap-0.5 px-2 py-2.5 text-left transition-colors hover:bg-cyan/[0.04]">
+                    <span className="truncate text-sm transition-colors group-hover/row:text-cyan">
+                      <span className="font-mono text-xs text-ink-subtle">{x.key}</span> {x.title}
                     </span>
-                    {x.outcome && <span className="truncate text-xs text-success/80">{x.outcome}</span>}
+                    {x.outcome && <span className="truncate text-xs text-success/85">{x.outcome}</span>}
                   </button>
                 </li>
               ))}
-              {recentDone.length === 0 && <li className="py-6 text-center text-sm text-ink-subtle">{t('common.none')}</li>}
+              {recentDone.length === 0 && (
+                <li>
+                  <EmptyState icon={<CheckCircle2 />} className="py-6">
+                    {t('common.none')}
+                  </EmptyState>
+                </li>
+              )}
             </ul>
           </Panel>
         </div>

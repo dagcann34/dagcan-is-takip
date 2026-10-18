@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { BriefcaseBusiness, ClipboardList, Copy, Mail, Siren, Sparkles } from 'lucide-react';
-import { Button, Field, Input, PageHeader, Panel, Select, Textarea } from '../../components/ui';
+import { BriefcaseBusiness, ClipboardList, Copy, ListChecks, Mail, ShieldCheck, Siren, Sparkles } from 'lucide-react';
+import { Button, EmptyState, Field, Input, PageHeader, Panel, SectionTitle, Select, Textarea } from '../../components/ui';
 import { useT, type MessageKey } from '../../i18n';
 import { isDesktop } from '../../lib/platform';
 import { errorMessage, toast } from '../../lib/toast';
 import { useBoard } from '../board/boardStore';
+import { copySensitive } from '../vault/vaultApi';
 import {
   AUDIENCES,
   audienceLabel,
@@ -57,6 +58,7 @@ export function AiStudio() {
   const [busy, setBusy] = useState(false);
 
   const selectedTasks = candidates.filter((x) => picked.has(x.id));
+  const ModeIcon = MODES.find((m) => m.id === mode)!.icon;
 
   function build(): PromptPair {
     switch (mode) {
@@ -107,45 +109,69 @@ export function AiStudio() {
     <div className="flex h-full flex-col">
       <PageHeader title={t('ai.title')} subtitle={t('ai.subtitle')} />
       <div className="grid min-h-0 flex-1 grid-cols-[440px_1fr] gap-5 px-8 pb-8">
-        <Panel className="flex flex-col gap-4 overflow-auto p-5">
-          <div className="grid grid-cols-2 gap-1 notch-sm bg-obsidian-950/60 p-1">
-            {MODES.map(({ id, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setMode(id)}
-                className={`flex h-9 items-center justify-center gap-2 text-sm font-medium transition-colors ${
-                  mode === id ? 'bg-navy-700 text-ink shadow' : 'text-ink-muted hover:text-ink'
-                }`}
-              >
-                <Icon className="size-4" /> {t(`ai.mode.${id}` as MessageKey)}
-              </button>
-            ))}
+        <Panel className="flex flex-col gap-5 overflow-auto p-5">
+          <div role="tablist" className="notch-sm grid grid-cols-2 gap-1 border border-line bg-obsidian-950/60 p-1">
+            {MODES.map(({ id, icon: Icon }) => {
+              const on = mode === id;
+              return (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setMode(id)}
+                  className={`font-display relative flex h-10 items-center justify-center gap-2 text-[14px] font-semibold tracking-[0.04em] transition-[background-color,color,box-shadow] duration-150 ${
+                    on
+                      ? 'notch-sm bg-gradient-to-b from-cyan/[0.16] to-cyan/[0.06] text-cyan shadow-[inset_0_0_0_1px_rgb(0_240_255/0.45)] [text-shadow:0_0_10px_rgb(0_240_255/0.4)]'
+                      : 'text-ink-muted hover:bg-cyan/[0.05] hover:text-ink'
+                  }`}
+                >
+                  {on && <span aria-hidden className="absolute inset-x-6 bottom-0 h-px bg-magenta shadow-[0_0_8px_rgb(255_46_136/0.9)]" />}
+                  <Icon className="size-4 shrink-0" /> <span className="truncate">{t(`ai.mode.${id}` as MessageKey)}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold tracking-wide text-ink-muted uppercase">{t('ai.tasks', { count: selectedTasks.length })}</span>
-              {mode !== 'change' && (
-                <label className="flex items-center gap-2 text-xs text-ink-muted">
-                  <input type="checkbox" checked={onlyDone} onChange={(e) => setOnlyDone(e.target.checked)} /> {t('ai.onlyDone')}
-                </label>
-              )}
-            </div>
-            <ul className="max-h-52 space-y-1 overflow-auto notch-sm border border-line p-1">
-              {candidates.map((x) => (
-                <li key={x.id}>
-                  <label className="flex cursor-pointer items-start gap-3 px-2.5 py-2 hover:bg-white/5">
-                    <input type="checkbox" className="mt-1" checked={picked.has(x.id)} onChange={() => toggle(x.id)} />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm">
-                        <span className="text-ink-subtle">{x.key}</span> {x.title}
-                      </span>
-                      <span className={`block truncate text-xs ${x.outcome ? 'text-success/80' : 'text-warning/80'}`}>{x.outcome || t('ai.noOutcome')}</span>
-                    </span>
+            <SectionTitle
+              className="mb-2"
+              icon={<ListChecks />}
+              actions={
+                mode !== 'change' && (
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-ink-muted hover:text-ink">
+                    <input type="checkbox" checked={onlyDone} onChange={(e) => setOnlyDone(e.target.checked)} /> {t('ai.onlyDone')}
                   </label>
+                )
+              }
+            >
+              {t('ai.tasks', { count: selectedTasks.length })}
+            </SectionTitle>
+            <ul className="notch-sm max-h-52 space-y-px overflow-auto border border-line-strong bg-obsidian-950/40 p-1">
+              {candidates.map((x) => {
+                const on = picked.has(x.id);
+                return (
+                  <li key={x.id}>
+                    <label
+                      className={`flex cursor-pointer items-start gap-3 px-2.5 py-2 transition-colors ${on ? 'bg-cyan/[0.06] hover:bg-cyan/10' : 'hover:bg-cyan/[0.04]'}`}
+                    >
+                      <input type="checkbox" className="mt-0.5" checked={on} onChange={() => toggle(x.id)} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm">
+                          <span className="font-mono text-xs text-ink-subtle">{x.key}</span> {x.title}
+                        </span>
+                        <span className={`mt-0.5 block truncate text-xs ${x.outcome ? 'text-success/85' : 'text-warning/85'}`}>{x.outcome || t('ai.noOutcome')}</span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+              {candidates.length === 0 && (
+                <li>
+                  <EmptyState icon={<ListChecks />} className="py-6">
+                    {t('common.none')}
+                  </EmptyState>
                 </li>
-              ))}
-              {candidates.length === 0 && <li className="px-3 py-4 text-center text-xs text-ink-subtle">{t('common.none')}</li>}
+              )}
             </ul>
           </div>
 
@@ -205,36 +231,57 @@ export function AiStudio() {
             </>
           )}
 
-          <label className="flex items-start gap-2 border border-line bg-obsidian-950/40 p-3 text-xs text-ink-muted">
+          <label
+            className={`notch-sm flex cursor-pointer items-start gap-3 border p-3 text-xs leading-relaxed transition-colors ${
+              redact ? 'border-success/35 bg-success/[0.05] text-ink-muted' : 'border-warning/40 bg-warning/[0.05] text-ink-muted'
+            }`}
+          >
             <input type="checkbox" className="mt-0.5" checked={redact} onChange={(e) => setRedact(e.target.checked)} />
+            <ShieldCheck className={`mt-px size-4 shrink-0 ${redact ? 'text-success' : 'text-warning'}`} />
             <span>{t('ai.redact')}</span>
           </label>
 
-          <Button variant="primary" onClick={generate} disabled={busy}>
-            <Sparkles className="size-4" /> {busy ? t('ai.writing') : isDesktop ? t('ai.generate') : t('ai.preview')}
+          <Button variant="primary" className="mt-auto h-10 shrink-0" onClick={generate} disabled={busy}>
+            <Sparkles className={`size-4 ${busy ? 'animate-pulse' : ''}`} /> {busy ? t('ai.writing') : isDesktop ? t('ai.generate') : t('ai.preview')}
           </Button>
         </Panel>
 
         <Panel className="flex min-h-0 flex-col overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line px-5 py-3">
-            <span className="text-sm font-medium">{t(`ai.output.${mode}` as MessageKey)}</span>
+          <div className="relative flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-5">
+            <SectionTitle className="min-w-0 flex-1" icon={<ModeIcon />}>
+              {t(`ai.output.${mode}` as MessageKey)}
+            </SectionTitle>
+            {busy && (
+              <span aria-hidden className="absolute inset-x-0 -bottom-px h-px overflow-hidden">
+                <span className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-cyan to-transparent [animation:sweep_1.6s_linear_infinite]" />
+              </span>
+            )}
             <Button
               variant="ghost"
+              className="h-8 px-2.5 text-[14px]"
               disabled={!output}
               onClick={async () => {
-                await navigator.clipboard.writeText(output);
+                await copySensitive(output);
                 toast(t('common.copied'));
               }}
             >
               <Copy className="size-4" /> {t('common.copy')}
             </Button>
           </div>
-          <Textarea
-            className="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent px-5 py-4 text-sm leading-relaxed"
-            placeholder={t('ai.outputPh')}
-            value={output}
-            onChange={(e) => setOutput(e.target.value)}
-          />
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            <Textarea
+              className="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent px-5 py-4 text-sm leading-relaxed hover:border-0 focus:bg-cyan/[0.015] focus:shadow-none"
+              aria-label={t(`ai.output.${mode}` as MessageKey)}
+              placeholder={busy || output ? undefined : t('ai.outputPh')}
+              value={output}
+              onChange={(e) => setOutput(e.target.value)}
+            />
+            {!output && (
+              <EmptyState icon={<Sparkles className={busy ? 'animate-pulse text-cyan' : ''} />} className="pointer-events-none absolute inset-0 top-14">
+                {busy ? t('ai.writing') : null}
+              </EmptyState>
+            )}
+          </div>
         </Panel>
       </div>
     </div>

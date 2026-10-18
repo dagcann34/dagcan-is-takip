@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-board-export-encrypted"
+description = "Enables the board_export_encrypted command without any pre-configured scope."
+commands.allow = ["board_export_encrypted"]
+
+[[permission]]
+identifier = "deny-board-export-encrypted"
+description = "Denies the board_export_encrypted command without any pre-configured scope."
+commands.deny = ["board_export_encrypted"]

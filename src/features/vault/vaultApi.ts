@@ -25,6 +25,8 @@ export interface VaultStatus {
   initialized: boolean;
   unlocked: boolean;
   autoLockMinutes: number;
+  /** v2 kasa var ama bu cihazda gizli anahtar yok: kurtarma anahtarı gerekir. */
+  needsRecovery: boolean;
 }
 
 export interface VaultItem {
@@ -33,7 +35,8 @@ export interface VaultItem {
   title: string;
   username?: string | null;
   host?: string | null;
-  notes?: string | null;
+  /** Notlar listeye gönderilmez; düzenlerken `vault.notes(id)` ile tek tek istenir. */
+  hasNotes: boolean;
   tags: string[];
   updatedAt: number;
 }
@@ -46,6 +49,7 @@ export interface VaultItemInput {
   host?: string;
   /** Güncellemede boş bırakılırsa mevcut gizli değer korunur. */
   secret?: string;
+  /** Güncellemede undefined ise mevcut not korunur; boş metin notu siler. */
   notes?: string;
   tags: string[];
 }
@@ -53,8 +57,11 @@ export interface VaultItemInput {
 // Tüm kriptografi Rust tarafında; bu modül sadece ince bir IPC katmanıdır.
 export const vault = {
   status: () => invoke<VaultStatus>('vault_status'),
-  init: (password: string) => invoke<void>('vault_init', { password }),
-  unlock: (password: string) => invoke<void>('vault_unlock', { password }),
+  /** Yeni kasa oluşturur ve bir kez gösterilecek kurtarma anahtarını döner. */
+  init: (password: string) => invoke<string>('vault_init', { password }),
+  unlock: (password: string, recovery?: string) => invoke<void>('vault_unlock', { password, recovery: recovery || null }),
+  recoveryKey: () => invoke<string>('vault_recovery_key'),
+  notes: (id: string) => invoke<string | null>('vault_item_notes', { id }),
   lock: () => invoke<void>('vault_lock'),
   touch: () => invoke<void>('vault_touch'),
   setAutoLock: (minutes: number) => invoke<void>('vault_set_auto_lock', { minutes }),
@@ -65,3 +72,9 @@ export const vault = {
   copy: (id: string) => invoke<number>('vault_copy', { id }),
   exportBackup: () => invoke<string>('vault_export_backup'),
 };
+
+/** Metni güvenli panoya kopyalar (pano geçmişi / bulut / Universal Clipboard dışı, süreli temizleme). */
+export async function copySensitive(text: string): Promise<void> {
+  if ('__TAURI_INTERNALS__' in window) await invoke('copy_sensitive_text', { text });
+  else await navigator.clipboard.writeText(text);
+}

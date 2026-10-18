@@ -1,0 +1,22 @@
+/* Veri koruma: arayüz metni seçilemez; yalnızca kullanıcının yazdığı alanlar seçilebilir. */
+.data-guard body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.data-guard input,
+.data-guard textarea,
+.data-guard [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.data-guard img {
+  -webkit-user-drag: none;
+}
+/* Yazdırma tamamen boş sayfa üretir. */
+@media print {
+  html,
+  body {
+    display: none !important;
+  }
+}

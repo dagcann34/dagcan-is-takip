@@ -1,7 +1,9 @@
 [package]
-name = "dagcan-is-takip"
-version = "0.5.0"
-description = "Dağcan İş Takip — Enterprise Task & Security Hub"
+name = "kanvault"
+version = "1.0.0"
+description = "Kanvault — Task & Security Hub. Developed by Dağcan Nural."
+authors = ["Dağcan Nural"]
+license = "MIT"
 edition = "2021"
 
 [lib]
@@ -13,7 +15,6 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = ["tray-icon"] }
-tauri-plugin-clipboard-manager = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-opener = "2"
@@ -28,10 +29,13 @@ aes-gcm = "0.10"
 rand = "0.8"
 zeroize = { version = "1", features = ["derive"] }
 base64 = "0.22"
+keyring = { version = "3", features = ["apple-native", "windows-native"] }
 uuid = { version = "1", features = ["v4"] }
 
 # Claude API istemcisi (anahtar asla WebView'e çıkmaz)
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+hkdf = "0.13.0"
+sha2 = "0.11.1"
 
 [profile.release]
 codegen-units = 1
@@ -47,3 +51,14 @@ incremental = false
 
 [profile.dev.package."*"]
 opt-level = 1
+
+# Gizli değer kopyalama: pano geçmişi / bulut panosu / Universal Clipboard dışında tutulur.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2-app-kit = { version = "0.3", default-features = false, features = ["std", "NSPasteboard"] }
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSString"] }
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+arboard = "3.7"
+
+[target.'cfg(windows)'.dependencies]
+clipboard-win = "5"

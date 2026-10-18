@@ -1,9 +1,42 @@
-# Changelog / Sürüm Notları
+# Kanvault — Changelog / Sürüm Notları
 
 All notable changes to this project are documented here in English and Turkish.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: [SemVer](https://semver.org/).
 
 Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak belgelenir.
+
+---
+
+## [1.0.0] — 2026-10-18 — Kanvault
+
+### 🇬🇧 English
+
+**The app is now Kanvault** (formerly "Dağcan İş Takip") — free, open source and developed by Dağcan Nural. Existing data is kept automatically.
+
+**Added**
+- **Time Machine**: every change is recorded (encrypted). Go back to any day to see the board as it was and that day’s activity; 26-week activity heatmap.
+- **Dashboard Studio**: date-range reports (this week, last 7/30 days, month, quarter, year, custom) in five themes — Neon HUD, Whiteboard, Chalkboard, Executive, Blueprint — exported as PNG or PDF. Chart colors are validated for color-vision deficiencies.
+- **Security hardening**: board and history encrypted at rest with a key kept in the OS keychain; screenshot/screen-recording protection; text selection, copy, context menu, drag and print blocked outside input fields; per-window command permissions; stricter CSP with frozen prototypes; exponential back-off on wrong master passwords; private (0600) atomic file writes.
+- Bilingual **About** page and a permanent “Dağcan Nural tarafından geliştirilmiştir · Developed by Dağcan Nural” credit in the bottom-right corner.
+- New Kanvault logo and polished Neon Grid visuals (vault, AI Studio, command palette, notifications, accessibility contrast).
+
+### 🇹🇷 Türkçe
+
+**Uygulamanın yeni adı Kanvault** (eski adı "Dağcan İş Takip"). Ücretsiz ve açık kaynaktır, Dağcan Nural tarafından geliştirilmiştir. Mevcut veriler otomatik olarak korunur.
+
+**Eklenenler**
+- **Zaman Makinesi**: her değişiklik şifreli olarak kaydedilir. Herhangi bir güne dönüp panonun o günkü hâli ve o günün etkinlikleri görülebilir; 26 haftalık etkinlik ısı haritası da var.
+- **Dashboard Stüdyosu**: tarih aralığı raporları (bu hafta, son 7/30 gün, ay, çeyrek, yıl, özel). Beş tema var: Neon HUD, Beyaz Tahta, Kara Tahta, Yönetici, Blueprint. Raporlar PNG veya PDF olarak dışa aktarılır. Grafik renkleri renk körlüğüne karşı doğrulandı.
+- **Güvenlik sertleştirmesi**:
+  - Pano ve geçmiş diskte şifreli; anahtar işletim sistemi anahtar zincirinde.
+  - Ekran görüntüsü ve ekran kaydı koruması.
+  - Giriş alanları dışında seçme, kopyalama, sağ tık, sürükleme ve yazdırma engeli.
+  - Pencere bazında komut izinleri.
+  - Dondurulmuş prototiplerle daha sıkı CSP.
+  - Hatalı ana parolada üstel bekleme.
+  - Yalnızca sahibin okuyabildiği (0600) atomik dosya yazımı.
+- İki dilli **Hakkında** sayfası ve sağ alt köşede kalıcı "Dağcan Nural tarafından geliştirilmiştir · Developed by Dağcan Nural" imzası.
+- Yeni Kanvault logosu. Kasa, AI Stüdyo, komut paleti ve bildirimlerde Neon Grid tasarımı cilalandı; erişilebilirlik kontrastı iyileştirildi.
 
 ---
 
@@ -145,8 +178,9 @@ Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak b
 - AI Stüdyo: Claude API ile yönetici özeti e-postası ve STAR yöntemli CV/LinkedIn dönüştürücü, yerel maskeleme.
 - Sistem tepsisi / menü çubuğu, global Hızlı Görev kısayolu, son tarih için yerel bildirimler.
 
-[0.5.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.5.0
-[0.4.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.4.0
-[0.3.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.3.0
-[0.2.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.2.0
-[0.1.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.1.0
+[1.0.0]: https://github.com/dagcann34/kanvault/releases/tag/v1.0.0
+[0.5.0]: https://github.com/dagcann34/kanvault/releases/tag/v0.5.0
+[0.4.0]: https://github.com/dagcann34/kanvault/releases/tag/v0.4.0
+[0.3.0]: https://github.com/dagcann34/kanvault/releases/tag/v0.3.0
+[0.2.0]: https://github.com/dagcann34/kanvault/releases/tag/v0.2.0
+[0.1.0]: https://github.com/dagcann34/kanvault/releases/tag/v0.1.0

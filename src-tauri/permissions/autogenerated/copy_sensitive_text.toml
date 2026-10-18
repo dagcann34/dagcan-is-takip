@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-copy-sensitive-text"
+description = "Enables the copy_sensitive_text command without any pre-configured scope."
+commands.allow = ["copy_sensitive_text"]
+
+[[permission]]
+identifier = "deny-copy-sensitive-text"
+description = "Denies the copy_sensitive_text command without any pre-configured scope."
+commands.deny = ["copy_sensitive_text"]

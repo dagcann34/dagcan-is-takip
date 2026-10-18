@@ -1,56 +1,50 @@
 <p align="center">
-  <img src="public/favicon.svg" width="96" alt="Dağcan İş Takip logosu" />
+  <img src="public/favicon.svg" width="104" alt="Kanvault logosu" />
 </p>
 
-<h1 align="center">Dağcan İş Takip</h1>
-<p align="center"><b>BT altyapı ekipleri için kurumsal iş ve güvenlik merkezi</b><br/>
-Neon cyberpunk Kanban · sıfır bilgi kasa · AI raporlama · Windows ve macOS</p>
+<h1 align="center">Kanvault</h1>
+<p align="center"><b>BT ekipleri için iş ve güvenlik merkezi — ücretsiz ve açık kaynak</b><br/>
+Neon Kanban pano · Zaman Makinesi · Dashboard Stüdyosu · sıfır bilgi kasa · AI raporlama<br/>
+Windows ve macOS · Türkçe ve English</p>
 
 <p align="center">
   <a href="README.md">🇬🇧 English</a> ·
+  <a href="https://github.com/dagcann34/kanvault/releases/latest">İndir</a> ·
   <a href="CHANGELOG.md">Sürüm notları</a> ·
-  <a href="https://github.com/dagcann34/dagcan-is-takip/releases">İndir</a> ·
   <a href="SECURITY.md">Güvenlik</a>
 </p>
 
-<p align="center">
-  <img alt="Lisans: MIT" src="https://img.shields.io/badge/lisans-MIT-0052CC" />
-  <img alt="Tauri v2" src="https://img.shields.io/badge/Tauri-v2-00B8D9" />
-  <img alt="Platformlar" src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-172B4D" />
-  <img alt="Diller" src="https://img.shields.io/badge/aray%C3%BCz-T%C3%BCrk%C3%A7e%20%7C%20English-36B37E" />
-</p>
+<p align="center"><img src="docs/screenshots/board-tr.png" width="880" alt="Kanvault pano" /></p>
 
-<p align="center"><img src="docs/screenshots/board.png" width="860" alt="Pano ekran görüntüsü" /></p>
+> **Dağcan Nural tarafından geliştirilmiştir.** Kanvault tamamen ücretsizdir: reklam, abonelik veya veri toplama yoktur.
 
-## Neden?
+## Neden Kanvault?
 
-Sistem yöneticileri iş kayıtlarını, PowerShell betiklerini, sunucu parolalarını ve durum e-postalarını beş farklı araçta yönetiyor. Dağcan İş Takip; iş panosunu, şifreli kasayı ve AI yazım asistanını hızlı, yerel öncelikli tek bir masaüstü uygulamasında birleştirir. Ücretsiz ve açık kaynaklıdır.
+Sistem yöneticileri iş kayıtlarını, PowerShell betiklerini, sunucu parolalarını ve durum e-postalarını birçok araçta yönetiyor. Kanvault; iş panosunu, şifreli kasayı, yaptığın işlerin tam geçmişini ve AI yazım asistanını hızlı, yerel öncelikli tek bir masaüstü uygulamasında birleştirir. Siz dışa aktarmadıkça verileriniz cihazdan çıkmaz.
 
 ## Özellikler
 
 | | |
 |---|---|
-| **Yıllık takvim** | Sağda sabit panel: 12 ay, teslim ve tamamlanma günleri, gecikmeler ve resmi tatiller; güne tıklayınca görevleri listelenir |
-| **Genel Bakış paneli** | Açık, gecikmiş, bu hafta teslim, son 7 günde biten, engellenen iş ve takip edilen süre göstergeleri; durum dağılımı; yaklaşan teslimler |
-| **Sabit Kanban pano** | Pencereye her zaman tam oturan dört sütun; kazara sürükleme yok. Kartlar ◀ ▶ veya `Alt + ←/→` ile taşınır; bağımlılık, öncelik ve son tarih rozetleri |
-| **Dışa aktarma ve paylaşım** | Panonun tamamını yüksek çözünürlüklü PNG, vektörel SVG veya PDF olarak; tek bir kartı görsel olarak (kaydedilir + panoya kopyalanır) |
-| **Tekrarlayan görevler ve şablonlar** | Günlükten yıllığa kadar, tamamlanınca kendini yeniden oluşturan görevler; yama, sertifika yenileme, yedek testi, işe giriş/çıkış ve yetki gözden geçirme şablonları |
-| **Filtre ve takvime aktarma** | Panoda arama/öncelik filtresi; teslim tarihlerini .ics olarak Apple Takvim / Outlook'a aktarma |
-| **Kontrol listesi ve süre takibi** | İlerleme çubuklu alt adımlar, görev başına başlat/durdur zamanlayıcı |
-| **Sıfır bilgi kasa** | Parola, sunucu, PowerShell betiği, not ve API anahtarları Rust tarafında Argon2id + AES-256-GCM ile şifrelenir |
-| **Otomatik kilit ve pano temizleme** | Hareketsizlikte (1–30 dk) veya arka planda 60 sn sonra kilitlenir; kopyalanan gizli değer 30 sn sonra silinir |
-| **Parola üretici** | Sapmasız, kriptografik rastgele üretici; varsayılan 24 karakter |
-| **AI Stüdyo (Claude)** | Yönetici özeti e-postası, STAR yöntemiyle CV/LinkedIn maddeleri, ITIL değişiklik talebi (RFC/CAB), suçlamasız olay sonrası rapor |
-| **Yerel maskeleme** | IP, e-posta, UNC yolu ve parola benzeri ifadeler cihazdan çıkmadan maskelenir |
-| **Komut paleti** | `⌘K` / `Ctrl+K` ile her yere git, görev ara, görev oluştur, kasayı kilitle, dili değiştir |
-| **Sistem tepsisi / menü çubuğu** | Arka planda çalışır; `⌘⇧Space` / `Ctrl+Shift+Space` Hızlı Görev penceresini açar |
-| **Yerel bildirimler** | Yaklaşan ve geciken işler için macOS ve Windows bildirim merkezi |
-| **Çift dil** | Arayüz, tepsi menüsü ve hata mesajları tamamen Türkçe ve İngilizce |
-| **Yedekleme** | Pano JSON dışa/içe aktarma, şifreli kasa yedeği |
+| **Sabit Kanban pano** | Pencereye her zaman tam oturan dört sütun; kazara sürükleme yok. Kartlar ◀ ▶ veya `Alt + ←/→` ile taşınır. Öncelik, son tarih, bağımlılık, kontrol listesi ve süre takibi |
+| **Zaman Makinesi** | Her değişiklik kaydedilir. Geçmişteki herhangi bir günü seçip panonun o günkü hâlini ve o günün etkinlik akışını gör; 26 haftalık etkinlik ısı haritası |
+| **Dashboard Stüdyosu** | Tarih aralığı seç (bu hafta, son 30 gün, çeyrek, yıl veya özel), tema seç: **Neon HUD, Beyaz Tahta, Kara Tahta, Yönetici, Blueprint**. PNG/PDF olarak dışa aktar |
+| **Yıllık takvim** | Teslim, tamamlanma, gecikme günleri ve resmi tatiller tek bakışta; Apple Takvim / Outlook'a aktarma (.ics) |
+| **Tekrarlayan görevler ve şablonlar** | Günlükten yıllığa tekrar; yama, sertifika yenileme, yedek testi, işe giriş/çıkış ve yetki gözden geçirme şablonları |
+| **Sıfır bilgi kasa** | Parola, sunucu, PowerShell betiği, not ve API anahtarları Rust tarafında Argon2id + AES-256-GCM ile şifrelenir. Otomatik kilit, 30 saniyelik pano temizleme ve parola üretici var |
+| **AI Stüdyo (Claude)** | Yönetici özeti e-postası, STAR CV/LinkedIn maddeleri, ITIL değişiklik talebi ve suçlamasız olay raporu üretir; hassas veriler önce cihazda maskelenir |
+| **Veri koruma** | Pano ve geçmiş diskte şifreli tutulur (anahtar işletim sistemi anahtar zincirinde). Ekran görüntüsü ve kayıt koruması var; arayüz verisi seçilemez ve kopyalanamaz |
+| **Günlük kullanım** | `⌘K` / `Ctrl+K` komut paleti, menü çubuğu/tepside çalışma, `⌘⇧Space` hızlı görev, yerel bildirimler, oturum açınca başlatma |
+| **Çift dil** | Arayüz tamamen Türkçe ve İngilizce; uygulama içinde iki dilli Hakkında sayfası da var |
+
+<p align="center">
+  <img src="docs/screenshots/dashboards-tr.png" width="430" alt="Dashboard Stüdyosu" />
+  <img src="docs/screenshots/history-tr.png" width="430" alt="Zaman Makinesi" />
+</p>
 
 ## İndir
 
-En güncel `.dmg` (macOS, Apple Silicon ve Intel) veya `.msi` / `.exe` (Windows) dosyasını **[Releases](https://github.com/dagcann34/dagcan-is-takip/releases)** sayfasından indir.
+En güncel `.dmg` (macOS, Apple Silicon ve Intel) veya `.exe` / `.msi` (Windows) dosyasını **[Releases](https://github.com/dagcann34/kanvault/releases/latest)** sayfasından indir.
 
 > Sürümler henüz kod imzalı değil. macOS'ta ilk açılışta sağ tık → **Aç**; Windows'ta SmartScreen'de **Ek bilgi → Yine de çalıştır**.
 
@@ -59,48 +53,28 @@ En güncel `.dmg` (macOS, Apple Silicon ve Intel) veya `.msi` / `.exe` (Windows)
 Gereksinimler: Node.js 20+, Rust (stable); Windows'ta ayrıca WebView2 ve MSVC derleme araçları.
 
 ```bash
-git clone https://github.com/dagcann34/dagcan-is-takip.git
-cd dagcan-is-takip
+git clone https://github.com/dagcann34/kanvault.git
+cd kanvault
 npm install
-npm run tauri dev      # anında yenilemeli masaüstü uygulaması
-npm run tauri build    # kurulum dosyaları: src-tauri/target/release/bundle
-npm run dev            # yalnızca arayüz önizlemesi (kasa ve AI kapalı)
-cd src-tauri && cargo test   # kripto birim testleri
+npm run tauri dev
+npm run tauri build
+cd src-tauri && cargo test
 ```
-
-## AI kurulumu
-
-1. [Claude Console](https://platform.claude.com/) üzerinden bir API anahtarı al.
-2. **Güvenli Kasa**'da, türü **API Anahtarı** olan ve başlığında `Anthropic` geçen bir kayıt ekle.
-3. **AI Stüdyo**'yu aç, görevleri seç ve taslağı oluştur. Anahtar Rust sürecinde okunur, arayüze hiç ulaşmaz.
-
-Model: `claude-opus-5-5` (efor `medium`), reddetme durumunda sunucu tarafı yedek model.
 
 ## Güvenlik modeli
 
 | Konu | Uygulama |
 |---|---|
-| Anahtar türetme | Argon2id, m = 64 MiB, t = 3, p = 4, 16 bayt rastgele tuz |
-| Şifreleme | AES-256-GCM, kayıt başına rastgele 96-bit nonce, kayıt kimliği AAD'ye bağlı |
-| Anahtar hiyerarşisi | Parola → KEK → sarılı rastgele DEK. Parola ve anahtarlar diske yazılmaz |
-| Sıfır bilgi | Başlık, etiket ve kullanıcı adları da şifreli; kasa dosyası eşitlenebilir |
+| Kasa | Argon2id (m = 64 MiB, t = 3, p = 4) → KEK rastgele bir DEK'i sarar; her kayıt AES-256-GCM ile, kayıt kimliği AAD olarak bağlı |
+| Pano ve geçmiş | AES-256-GCM; rastgele anahtar macOS Anahtar Zinciri / Windows Kimlik Bilgisi Yöneticisi'nde. Dosya kopyalansa da anahtar olmadan okunamaz (Kerckhoffs ilkesi) |
+| Kaba kuvvet | Hatalı ana parola denemelerinden sonra üstel bekleme |
 | Bellek | Anahtarlar ve çözülmüş içerik bellekten silinirken sıfırlanır |
-| Arayüz | Sıkı CSP, ağ erişimi yok; Claude çağrısı Rust'ta yapılır |
+| Arayüz motoru | Sıkı CSP, dondurulmuş prototipler, uzak içerik yok; her pencere yalnızca ihtiyaç duyduğu komutları çağırabilir |
+| Arayüz | Ekran görüntüsü ve kayıt koruması; giriş alanları dışında seçme, kopyalama, sağ tık ve yazdırma kapalı |
 
-Güvenlik açığı bildirimi için [SECURITY.md](SECURITY.md).
-
-## Yol haritası
-
-- Uçtan uca şifreli eşitleme (iCloud Drive / OneDrive klasörü veya Supabase)
-- Pano verisinin de kasa anahtarıyla şifrelendiği SQLite depolama
-- Touch ID / Windows Hello ile kilit açma
-- PowerShell oyun alanı: kasadaki betikleri çalıştırıp çıktıyı göreve ekleme
-- Kod imzalı ve noter onaylı sürümler
-
-## Katkı
-
-Hata bildirimleri ve pull request'ler memnuniyetle karşılanır — bkz. [CONTRIBUTING.md](CONTRIBUTING.md). Arayüz metinlerini hem `tr` hem `en` sözlüğüne eklemeyi unutma.
+Güvenlik açıklarını özel olarak bildir: [SECURITY.md](SECURITY.md).
 
 ## Lisans
 
-[MIT](LICENSE) © 2026 Dağcan
+[MIT](LICENSE): kişisel ve ticari kullanım için ücretsiz.<br/>
+**Dağcan Nural tarafından geliştirilmiştir.**

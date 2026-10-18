@@ -65,17 +65,18 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
   const yearDone = tasks.filter((x) => x.status === 'done' && x.completedAt?.startsWith(String(year))).length;
 
   return (
-    <aside className="flex w-[318px] shrink-0 flex-col border-l border-line bg-obsidian-950/50 backdrop-blur-xl select-none" draggable={false}>
-      <header className="flex items-center gap-2 border-b border-line px-4 py-3.5">
+    <aside className="relative flex w-[318px] shrink-0 flex-col border-l border-line bg-obsidian-950/50 backdrop-blur-xl select-none" draggable={false}>
+      <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-magenta/0 via-cyan/35 to-cyan/0" />
+      <header className="flex h-[52px] shrink-0 items-center gap-2 border-b border-line px-4">
         <CalendarDays className="size-4 text-cyan" />
         <span className="font-display flex-1 text-[15px] font-bold tracking-[0.1em] uppercase">{t('calendar.title')}</span>
         <button
-          className="grid size-7 place-items-center text-ink-subtle hover:bg-white/10 hover:text-ink"
+          className="grid size-7 place-items-center border border-transparent text-ink-muted transition-colors hover:border-cyan/40 hover:bg-cyan/[0.07] hover:text-cyan active:translate-y-px"
           title={t('calendar.exportIcs')}
           onClick={async () => {
             try {
-              const path = await saveFile('dagcan-is-takip.ics', new TextEncoder().encode(buildIcs(tasks)), 'text/calendar');
-              toast(t('calendar.icsExported', { path }));
+              const path = await saveFile('kanvault.ics', new TextEncoder().encode(buildIcs(tasks)), 'text/calendar');
+              if (path) toast(t('calendar.icsExported', { path }));
             } catch (e) {
               toast(errorMessage(e), 'error');
             }
@@ -83,26 +84,26 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
         >
           <CalendarPlus className="size-4" />
         </button>
-        <button className="grid size-7 place-items-center text-ink-subtle hover:bg-white/10 hover:text-ink" onClick={onClose} title={t('calendar.hide')}>
+        <button className="grid size-7 place-items-center border border-transparent text-ink-muted transition-colors hover:border-cyan/40 hover:bg-cyan/[0.07] hover:text-cyan active:translate-y-px" onClick={onClose} title={t('calendar.hide')}>
           <PanelRightClose className="size-4" />
         </button>
       </header>
 
       <div className="flex items-center justify-between px-4 pt-3">
-        <button className="grid size-7 place-items-center text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y - 1)} aria-label="‹">
+        <button className="grid size-7 place-items-center border border-transparent text-ink-muted transition-colors hover:border-cyan/40 hover:bg-cyan/[0.07] hover:text-cyan active:translate-y-px" onClick={() => setYear((y) => y - 1)} aria-label="‹">
           <ChevronLeft className="size-4" />
         </button>
         <div className="text-center">
           <div className="font-display neon-text text-2xl font-bold tracking-[0.12em] tabular-nums">{year}</div>
-          <div className="text-[11px] text-ink-subtle">{t('calendar.yearStats', { due: yearDue, done: yearDone })}</div>
+          <div className="mt-0.5 text-[11px] text-ink-subtle">{t('calendar.yearStats', { due: yearDue, done: yearDone })}</div>
         </div>
-        <button className="grid size-7 place-items-center text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y + 1)} aria-label="›">
+        <button className="grid size-7 place-items-center border border-transparent text-ink-muted transition-colors hover:border-cyan/40 hover:bg-cyan/[0.07] hover:text-cyan active:translate-y-px" onClick={() => setYear((y) => y + 1)} aria-label="›">
           <ChevronRight className="size-4" />
         </button>
       </div>
       {year !== new Date().getFullYear() && (
         <button
-          className="mx-auto mt-1 rounded-full border border-line px-2.5 py-0.5 text-[11px] text-cyan hover:bg-white/5"
+          className="hud-chip animate-fade mx-auto mt-1.5 border-cyan/40 text-cyan transition-colors hover:bg-cyan/10"
           onClick={() => {
             setYear(new Date().getFullYear());
             setSelected(today);
@@ -121,8 +122,13 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
             const isCurrentMonth = year === new Date().getFullYear() && m === new Date().getMonth();
             return (
               <section key={m}>
-                <h4 className={`mb-1 px-0.5 text-[11px] font-semibold tracking-wide capitalize ${isCurrentMonth ? 'text-cyan' : 'text-ink-muted'}`}>{name}</h4>
-                <div className="grid grid-cols-7 text-center text-[8px] font-medium text-ink-subtle/70">
+                <h4
+                  className={`mb-1 flex items-center gap-1 px-0.5 text-[11px] font-semibold tracking-wide capitalize ${isCurrentMonth ? 'text-cyan [text-shadow:0_0_8px_rgb(0_240_255/0.5)]' : 'text-ink-muted'}`}
+                >
+                  {isCurrentMonth && <span aria-hidden className="h-2.5 w-0.5 bg-magenta shadow-[0_0_6px_rgb(255_46_136/0.9)]" />}
+                  {name}
+                </h4>
+                <div className="grid grid-cols-7 text-center text-[9px] font-medium text-ink-subtle">
                   {weekdays.map((w, i) => (
                     <span key={i} className="leading-4">
                       {w}
@@ -154,16 +160,16 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
                         draggable={false}
                         onClick={() => setSelected(isSel ? null : key)}
                         title={holiday ? holiday[lang] : undefined}
-                        className={`relative mx-auto grid size-[18px] place-items-center rounded-[5px] text-[10px] leading-none tabular-nums transition-colors ${
+                        className={`relative mx-auto grid size-[18px] place-items-center rounded-[2px] text-[10px] leading-none tabular-nums transition-colors ${
                           isSel
-                            ? 'bg-brand text-white'
+                            ? 'bg-magenta font-semibold text-obsidian-950 shadow-[0_0_8px_rgb(255_46_136/0.6)]'
                             : isToday
-                              ? 'text-cyan ring-1 ring-cyan'
+                              ? 'font-semibold text-cyan ring-1 ring-cyan shadow-[0_0_6px_rgb(0_240_255/0.5)]'
                               : holiday
-                                ? 'bg-magenta/15 text-magenta'
+                                ? 'bg-magenta/15 text-magenta hover:bg-magenta/25'
                                 : weekend
-                                  ? 'text-ink-subtle hover:bg-white/10'
-                                  : 'text-ink-muted hover:bg-white/10'
+                                  ? 'text-ink-subtle hover:bg-cyan/10 hover:text-ink'
+                                  : 'text-ink-muted hover:bg-cyan/10 hover:text-ink'
                         }`}
                       >
                         {d}
@@ -182,17 +188,17 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
           <Legend color="#FF2E63" label={t('calendar.legendOverdue')} />
           <Legend color="#3CFFA0" label={t('calendar.legendDone')} />
           <span className="flex items-center gap-1">
-            <span className="size-2 rounded-[2px] bg-danger/30" /> {t('calendar.legendHoliday')}
+            <span className="size-2 rounded-[2px] bg-magenta/30" /> {t('calendar.legendHoliday')}
           </span>
         </div>
       </div>
 
       {selected && (
-        <div className="max-h-[38%] overflow-auto border-t border-line px-4 py-3">
-          <div className="mb-2 text-xs font-semibold text-ink-muted">
+        <div key={selected} className="animate-fade max-h-[38%] overflow-auto border-t border-line bg-obsidian-950/30 px-4 py-3">
+          <div className="hud-label mb-2 text-[11px]!">
             {new Date(`${selected}T00:00:00`).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
-          {selHoliday && <div className="mb-2 bg-danger/10 px-2 py-1 text-xs text-magenta">🇹🇷 {selHoliday[lang]}</div>}
+          {selHoliday && <div className="mb-2 border-l-2 border-magenta bg-magenta/10 px-2 py-1 text-xs text-magenta">🇹🇷 {selHoliday[lang]}</div>}
           {!sel?.due.length && !sel?.done.length && <p className="text-xs text-ink-subtle">{t('calendar.noTasks')}</p>}
           <ul className="flex flex-col gap-1">
             {sel?.due.map((x) => (
@@ -219,10 +225,10 @@ function Legend({ color, label }: { color: string; label: string }) {
 function TaskRow({ task, tag, color, onOpen }: { task: Task; tag: string; color: string; onOpen: (id: string) => void }) {
   return (
     <li>
-      <button onClick={() => onOpen(task.id)} className="flex w-full items-center gap-2 px-1.5 py-1 text-left hover:bg-white/5">
-        <span className="h-4 w-0.5 shrink-0 rounded-full" style={{ background: color }} />
-        <span className="min-w-0 flex-1 truncate text-xs">
-          <span className="text-ink-subtle">{task.key}</span> {task.title}
+      <button onClick={() => onOpen(task.id)} className="group/row flex w-full items-center gap-2 px-1.5 py-1.5 text-left transition-colors hover:bg-cyan/[0.05]">
+        <span className="h-4 w-0.5 shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
+        <span className="min-w-0 flex-1 truncate text-xs transition-colors group-hover/row:text-cyan">
+          <span className="font-mono text-[11px] text-ink-subtle">{task.key}</span> {task.title}
         </span>
         <span className="shrink-0 text-[10px] text-ink-subtle">{tag}</span>
       </button>
