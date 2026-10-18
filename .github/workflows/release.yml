@@ -65,7 +65,16 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
 
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+      - name: Build provenance (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
-          subject-path: ${{ join(fromJSON(steps.tauri.outputs.artifactPaths), '
-            ') }}
+          subject-path: src-tauri/target/*/release/bundle/dmg/*.dmg
+
+      - name: Build provenance (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: |
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe
