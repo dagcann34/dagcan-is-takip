@@ -42,7 +42,7 @@ export function Toaster() {
       {items.map((t) => (
         <div
           key={t.id}
-          className="glass-strong flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
+          className="glass-strong flex items-start gap-3 notch-sm px-4 py-3 text-sm"
           style={{ animation: 'toast-in 160ms ease-out' }}
         >
           {t.tone === 'ok' ? (

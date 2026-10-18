@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { Download, ExternalLink, Languages, ShieldCheck, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, ExternalLink, Languages, Power, ShieldCheck, Upload } from 'lucide-react';
 import { Button, PageHeader, Panel } from '../../components/ui';
 import { setLang, useT, type Lang } from '../../i18n';
 import { isDesktop, openExternal, saveFile, timestamp } from '../../lib/platform';
@@ -14,6 +14,25 @@ const isMac = navigator.platform.toLowerCase().includes('mac');
 export function Settings() {
   const { t, lang } = useT();
   const fileInput = useRef<HTMLInputElement>(null);
+  const [autostart, setAutostart] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!isDesktop) return;
+    import('@tauri-apps/plugin-autostart').then((m) => m.isEnabled().then(setAutostart)).catch(() => setAutostart(false));
+  }, []);
+
+  async function toggleAutostart() {
+    try {
+      const m = await import('@tauri-apps/plugin-autostart');
+      if (autostart) await m.disable();
+      else await m.enable();
+      const now = await m.isEnabled();
+      setAutostart(now);
+      toast(now ? t('settings.autostartOn') : t('settings.autostartOff'));
+    } catch (e) {
+      toast(errorMessage(e), 'error');
+    }
+  }
 
   async function exportBoardJson() {
     try {
@@ -66,7 +85,7 @@ export function Settings() {
               <button
                 key={l}
                 onClick={() => setLang(l)}
-                className={`h-11 rounded-xl border text-sm font-medium transition-colors ${
+                className={`h-11 notch-sm border text-sm font-medium transition-colors ${
                   lang === l ? 'border-cyan/60 bg-cyan/10 text-ink' : 'border-line text-ink-muted hover:bg-white/5'
                 }`}
               >
@@ -108,6 +127,30 @@ export function Settings() {
             )}
           </div>
         </Panel>
+
+        {isDesktop && (
+          <Panel className="p-5">
+            <h3 className="mb-4 flex items-center gap-2 font-semibold">
+              <Power className="size-4 text-cyan" /> {t('settings.startup')}
+            </h3>
+            <label className="flex cursor-pointer items-start justify-between gap-4">
+              <span>
+                <span className="block text-sm">{t('settings.autostart')}</span>
+                <span className="mt-1 block text-xs text-ink-subtle">{t('settings.autostartHint')}</span>
+              </span>
+              <button
+                role="switch"
+                aria-checked={!!autostart}
+                disabled={autostart === null}
+                onClick={toggleAutostart}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${autostart ? 'bg-brand' : 'bg-white/15'}`}
+              >
+                <span className={`absolute top-0.5 size-5 rounded-full bg-white transition-all ${autostart ? 'left-[22px]' : 'left-0.5'}`} />
+              </button>
+            </label>
+            <p className="mt-4 text-xs text-ink-subtle">{t('settings.dataLocation')}</p>
+          </Panel>
+        )}
 
         <Panel className="p-5">
           <h3 className="mb-4 font-semibold">{t('settings.shortcuts')}</h3>

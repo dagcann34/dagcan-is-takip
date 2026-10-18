@@ -4,7 +4,7 @@
 
 <h1 align="center">Dağcan İş Takip</h1>
 <p align="center"><b>Enterprise Task & Security Hub for IT infrastructure teams</b><br/>
-Kanban whiteboard · zero-knowledge vault · AI reporting · Windows & macOS</p>
+Neon cyberpunk Kanban · zero-knowledge vault · AI reporting · Windows & macOS</p>
 
 <p align="center">
   <a href="README.tr.md">🇹🇷 Türkçe</a> ·
@@ -32,8 +32,10 @@ Sysadmins juggle tickets, PowerShell snippets, server passwords and status email
 |---|---|
 | **Year calendar** | Fixed right-side panel with all 12 months, due dates, completions, overdue days and Turkish public holidays; click a day to see its tasks |
 | **Overview dashboard** | Open, overdue, due-this-week, done-in-7-days, blocked and tracked-time KPIs, status distribution, upcoming deadlines |
-| **Kanban + whiteboard** | Drag cards between To Do / In Progress / Blocked / Done, draw dependency arrows, minimap, priorities, due-date badges |
+| **Fixed Kanban board** | Four columns that always fit the window — no accidental dragging; move cards with ◀ ▶ or `Alt + ←/→`, dependencies, priorities, due-date badges |
 | **Export & share** | Whole board as high-res PNG, vector SVG or PDF; any single card as an image (saved + copied to clipboard) |
+| **Recurring tasks & templates** | Daily → yearly repeats that recreate themselves on completion; ready templates for patching, certificate renewal, backup tests, onboarding/offboarding, access reviews |
+| **Filter & calendar export** | Search/priority filter on the board; export due dates to Apple Calendar / Outlook as .ics |
 | **Checklists & time tracking** | Sub-steps with progress bar, start/stop timer per task |
 | **Zero-knowledge vault** | Passwords, servers, PowerShell scripts, notes and API keys encrypted with Argon2id + AES-256-GCM in Rust |
 | **Auto-lock & clipboard clear** | Locks after idle time (1–30 min) or 60 s in background; copied secrets wiped after 30 s |
@@ -95,7 +97,7 @@ src/                     React 19 + TypeScript + Tailwind v4
 ├── components/          UI kit, command palette
 ├── features/
 │   ├── overview/        KPI dashboard
-│   ├── board/           React Flow Kanban, export, store
+│   ├── board/           Fixed Kanban grid, export, store
 │   ├── vault/           Vault UI (crypto lives in Rust)
 │   ├── ai/              Prompt templates, redaction, AI Studio
 │   ├── settings/        Language, backups, about

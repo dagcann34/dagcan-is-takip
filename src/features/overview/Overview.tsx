@@ -34,12 +34,12 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
     .slice(0, 5);
 
   const kpis = [
-    { label: t('overview.open'), value: open.length, icon: CircleDot, color: '#579DFF' },
-    { label: t('overview.overdue'), value: overdue.length, icon: AlertTriangle, color: '#FF5630' },
-    { label: t('overview.dueWeek'), value: dueWeek.length, icon: CalendarClock, color: '#FFAB00' },
-    { label: t('overview.doneWeek'), value: doneWeek.length, icon: CheckCircle2, color: '#36B37E' },
-    { label: t('overview.blocked'), value: blocked.length, icon: Ban, color: '#FF7452' },
-    { label: t('overview.timeTracked'), value: formatDuration(tracked), icon: Timer, color: '#00B8D9' },
+    { label: t('overview.open'), value: open.length, icon: CircleDot, color: '#00F0FF' },
+    { label: t('overview.overdue'), value: overdue.length, icon: AlertTriangle, color: '#FF2E63' },
+    { label: t('overview.dueWeek'), value: dueWeek.length, icon: CalendarClock, color: '#FCEE0A' },
+    { label: t('overview.doneWeek'), value: doneWeek.length, icon: CheckCircle2, color: '#3CFFA0' },
+    { label: t('overview.blocked'), value: blocked.length, icon: Ban, color: '#FF9F1C' },
+    { label: t('overview.timeTracked'), value: formatDuration(tracked), icon: Timer, color: '#FF2E88' },
   ];
 
   return (
@@ -48,25 +48,27 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
         title={t('overview.title')}
         subtitle={`${new Date(now).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })} · ${t('overview.subtitle')}`}
       />
-      <div className="flex flex-col gap-5 px-8 pb-8">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
+      <div className="@container flex flex-col gap-5 px-8 pb-8">
+        <div className="grid grid-cols-2 gap-4 @2xl:grid-cols-3 @5xl:grid-cols-6">
           {kpis.map(({ label, value, icon: Icon, color }) => (
             <Panel key={label} className="p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-ink-muted">{label}</span>
+                <span className="hud-label text-[11px]!">{label}</span>
                 <Icon className="size-4" style={{ color }} />
               </div>
-              <div className="mt-3 text-[28px] leading-none font-semibold tracking-tight tabular-nums">{value}</div>
+              <div className="font-display mt-3 text-[34px] leading-none font-bold tabular-nums" style={{ color, textShadow: `0 0 14px ${color}66` }}>
+                {value}
+              </div>
             </Panel>
           ))}
         </div>
 
         <Panel className="p-5">
-          <div className="mb-3 text-sm font-medium">{t('overview.distribution')}</div>
-          <div className="flex h-3 overflow-hidden rounded-full bg-white/5">
+          <div className="hud-label mb-3">{t('overview.distribution')}</div>
+          <div className="flex h-2.5 gap-0.5 overflow-hidden bg-white/5">
             {LANES.map((l) => {
               const n = tasks.filter((x) => x.status === l.status).length;
-              return n ? <div key={l.status} style={{ width: `${(n / tasks.length) * 100}%`, background: l.color }} title={`${statusLabel(l.status)}: ${n}`} /> : null;
+              return n ? <div key={l.status} style={{ width: `${(n / tasks.length) * 100}%`, background: l.color, boxShadow: `0 0 10px ${l.color}` }} title={`${statusLabel(l.status)}: ${n}`} /> : null;
             })}
           </div>
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-muted">
@@ -79,9 +81,9 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
           </div>
         </Panel>
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-5 @3xl:grid-cols-2">
           <Panel className="p-5">
-            <div className="mb-3 text-sm font-medium">{t('overview.upcoming')}</div>
+            <div className="hud-label mb-3">{t('overview.upcoming')}</div>
             {upcoming.length === 0 && <p className="py-6 text-center text-sm text-ink-subtle">{t('overview.noUpcoming')}</p>}
             <ul className="divide-y divide-line">
               {upcoming.map((x) => {
@@ -101,7 +103,7 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
           </Panel>
           <Panel className="p-5">
             {running.length > 0 && (
-              <div className="mb-4 rounded-xl border border-cyan/30 bg-cyan/10 p-3">
+              <div className="notch-sm mb-4 border border-cyan/40 bg-cyan/10 p-3">
                 <div className="text-xs font-medium text-cyan">{t('overview.running')}</div>
                 {running.map((x) => (
                   <button key={x.id} onClick={() => onOpenTask(x.id)} className="mt-1 flex w-full justify-between text-sm">
@@ -111,7 +113,7 @@ export function Overview({ onOpenTask }: { onOpenTask: (id: string) => void }) {
                 ))}
               </div>
             )}
-            <div className="mb-3 text-sm font-medium">{t('overview.recentDone')}</div>
+            <div className="hud-label mb-3">{t('overview.recentDone')}</div>
             <ul className="divide-y divide-line">
               {recentDone.map((x) => (
                 <li key={x.id}>

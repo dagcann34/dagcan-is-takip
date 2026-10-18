@@ -89,7 +89,7 @@ function LockScreen({ initialized, onDone }: { initialized: boolean; onDone: () 
     <div className="grid h-full place-items-center px-6">
       <Panel className="w-full max-w-md p-8">
         <div className="mb-6 flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-brand to-cyan">
+          <div className="grid size-11 place-items-center notch-sm bg-gradient-to-br from-brand to-cyan">
             <Lock className="size-5 text-white" />
           </div>
           <div>
@@ -245,7 +245,7 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
               const shown = revealed[item.id];
               return (
                 <li key={item.id} className="group flex items-start gap-4 px-4 py-3.5 hover:bg-white/[0.03]">
-                  <div className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-navy-700 text-cyan">
+                  <div className="mt-0.5 grid size-9 shrink-0 place-items-center bg-navy-700 text-cyan">
                     <Icon className="size-4" />
                   </div>
                   <button className="min-w-0 flex-1 text-left" onClick={() => setEditing({ ...item, username: item.username ?? '', host: item.host ?? '', notes: item.notes ?? '' })}>
@@ -257,7 +257,7 @@ function VaultBrowser({ autoLockMinutes, onLocked }: { autoLockMinutes: number; 
                       {[item.username, item.host].filter(Boolean).join(' @ ') || item.tags.join(', ') || '—'}
                     </div>
                     {shown !== undefined && (
-                      <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-obsidian-950 p-3 font-mono text-xs whitespace-pre-wrap text-ink">{shown || t('vault.empty')}</pre>
+                      <pre className="mt-2 max-h-48 overflow-auto bg-obsidian-950 p-3 font-mono text-xs whitespace-pre-wrap text-ink">{shown || t('vault.empty')}</pre>
                     )}
                   </button>
                   <div className="flex shrink-0 gap-1 opacity-70 group-hover:opacity-100">

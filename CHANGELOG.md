@@ -7,6 +7,58 @@ Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak b
 
 ---
 
+## [0.5.0] — 2026-10-18
+
+### 🇬🇧 English
+
+**Changed**
+- **New "Neon Grid" cyberpunk design**: night-black surfaces, neon cyan / magenta / signal-yellow accents, notched HUD panels, subtle grid and scanline texture, Rajdhani display type and JetBrains Mono for data. Contrast is tuned for readability.
+- **Fixed Kanban board**: the free-form canvas is replaced by four columns that always fit the available space. Cards can no longer be dragged; move them with the ◀ ▶ buttons on hover, `Alt + ←/→`, or the status field. Each column scrolls on its own; cards are sorted by priority, then due date.
+- **Responsive layout**: on narrower windows the year calendar and the task editor open as slide-over drawers so the board keeps its full width.
+- Dependencies are now set in the task editor ("Must finish first") and shown on cards as "Waiting on …".
+- Board export captures every card, including those scrolled out of view.
+
+**Removed**
+- The React Flow canvas dependency (smaller app).
+
+### 🇹🇷 Türkçe
+
+**Değişenler**
+- **Yeni "Neon Grid" cyberpunk tasarım**: gece siyahı yüzeyler; neon cyan, magenta ve sinyal sarısı vurgular; kesik köşeli HUD panelleri; hafif ızgara ve tarama çizgisi dokusu. Başlıklarda Rajdhani, veride JetBrains Mono kullanılır. Kontrast okunabilirlik için ayarlandı.
+- **Sabit Kanban pano**: serbest tuval yerine her zaman mevcut alana tam oturan dört sütun var. Kartlar artık sürüklenemez; üzerine gelince çıkan ◀ ▶ düğmeleri, `Alt + ←/→` veya durum alanıyla taşınır. Her sütun kendi içinde kayar; kartlar önceliğe, sonra teslim tarihine göre sıralanır.
+- **Duyarlı yerleşim**: dar pencerelerde yıllık takvim ve görev düzenleyici kayan çekmece olarak açılır, pano tam genişliğini korur.
+- Bağımlılıklar artık görev düzenleyicide ("Önce bitmesi gereken işler") belirlenir ve kartlarda "… bekleniyor" olarak görünür.
+- Pano dışa aktarımı, kaydırılmış olanlar dahil tüm kartları yakalar.
+
+**Kaldırılanlar**
+- React Flow tuval bağımlılığı (daha küçük uygulama).
+
+---
+
+## [0.4.0] — 2026-10-18
+
+### 🇬🇧 English
+
+**Added**
+- **Recurring tasks** (daily, weekly, monthly, quarterly, yearly): completing one automatically creates the next occurrence with its checklist reset and the due date moved forward (month-end safe).
+- **Task templates** for common IT work: monthly patching, SSL/TLS certificate renewal, backup restore test, onboarding, offboarding and quarterly access review — each with a ready checklist.
+- **Board filter**: search by key, title, description, assignee or outcome and filter by priority; non-matching cards fade but stay in place.
+- **Calendar export (.ics)**: due dates of open tasks as all-day events with reminders and repeat rules, for Apple Calendar, Outlook or Google Calendar.
+- **Launch at login** option in Settings; when started this way the app opens quietly in the menu bar / tray.
+- Board data is now also saved to `board.json` in the app data folder (existing data is migrated automatically), so it survives web-view cache clears.
+
+### 🇹🇷 Türkçe
+
+**Eklenenler**
+- **Tekrarlayan görevler** (günlük, haftalık, aylık, çeyreklik, yıllık): tamamlanınca bir sonraki kopya kontrol listesi sıfırlanmış ve teslim tarihi ileri alınmış olarak otomatik oluşur (ay sonu güvenli).
+- Sık yapılan BT işleri için **görev şablonları**: aylık yama, SSL/TLS sertifika yenileme, yedek geri yükleme testi, yeni çalışan hesabı, ayrılan çalışan hesabı kapatma ve çeyreklik yetki gözden geçirme; her biri hazır kontrol listesiyle.
+- **Pano filtresi**: anahtar, başlık, açıklama, atanan kişi veya sonuca göre arama ve öncelik filtresi; eşleşmeyen kartlar soluklaşır ama yerinde kalır.
+- **Takvime aktarma (.ics)**: açık görevlerin teslim tarihleri hatırlatıcılı ve tekrar kurallı tüm gün etkinlikleri olarak; Apple Takvim, Outlook veya Google Takvim için.
+- Ayarlar'da **oturum açınca otomatik başlat** seçeneği; bu şekilde açılınca uygulama menü çubuğunda/tepside sessizce başlar.
+- Pano verisi artık uygulama klasöründeki `board.json` dosyasına da kaydedilir (mevcut veri otomatik taşınır); böylece arayüz önbelleği temizlense bile korunur.
+
+---
+
 ## [0.3.0] — 2026-10-18
 
 ### 🇬🇧 English
@@ -93,6 +145,8 @@ Bu projedeki tüm önemli değişiklikler burada İngilizce ve Türkçe olarak b
 - AI Stüdyo: Claude API ile yönetici özeti e-postası ve STAR yöntemli CV/LinkedIn dönüştürücü, yerel maskeleme.
 - Sistem tepsisi / menü çubuğu, global Hızlı Görev kısayolu, son tarih için yerel bildirimler.
 
+[0.5.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.5.0
+[0.4.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.4.0
 [0.3.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.3.0
 [0.2.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.2.0
 [0.1.0]: https://github.com/dagcann34/dagcan-is-takip/releases/tag/v0.1.0

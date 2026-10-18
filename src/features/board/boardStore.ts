@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { getLang } from '../../i18n';
-import { CARD_INSET, LANES, LANE_HEADER, laneX, type BoardData, type Task } from './types';
+import { isDesktop } from '../../lib/platform';
+import { CARD_INSET, LANES, LANE_HEADER, laneX, shiftDate, type BoardData, type Task } from './types';
 
 /**
  * Görev panosu deposu. Görev başlıkları hassas değildir ve şimdilik localStorage'da tutulur;
@@ -59,9 +61,58 @@ export function getBoard(): BoardData {
   return cache;
 }
 
-export function saveBoard(data: BoardData) {
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/** Tamamlanan tekrarlayan görevler için bir sonraki kopyayı ekler. Değişiklik yaptıysa yeni veriyi döner. */
+function spawnRecurrences(data: BoardData): BoardData | null {
+  const due = data.tasks.filter((t) => t.status === 'done' && t.recurrence && !t.recurrenceSpawned);
+  if (!due.length) return null;
+  let seq = data.seq;
+  const todoCount = data.tasks.filter((t) => t.status === 'todo').length;
+  const spawned: Task[] = due.map((t, i) => {
+    seq += 1;
+    return {
+      id: crypto.randomUUID(),
+      key: `DGN-${seq}`,
+      title: t.title,
+      description: t.description,
+      priority: t.priority,
+      assignee: t.assignee,
+      recurrence: t.recurrence,
+      status: 'todo',
+      dueDate: shiftDate(t.dueDate ?? today(), t.recurrence!),
+      checklist: t.checklist?.map((c) => ({ ...c, id: crypto.randomUUID(), done: false })),
+      x: col('todo'),
+      y: row(todoCount + i),
+    };
+  });
+  const ids = new Set(due.map((t) => t.id));
+  return {
+    ...data,
+    seq,
+    tasks: [...data.tasks.map((t) => (ids.has(t.id) ? { ...t, recurrenceSpawned: true } : t)), ...spawned],
+  };
+}
+
+let fileTimer: ReturnType<typeof setTimeout> | undefined;
+function persistToFile(raw: string) {
+  if (!isDesktop) return;
+  clearTimeout(fileTimer);
+  fileTimer = setTimeout(() => invoke('board_save', { data: raw }).catch(() => {}), 400);
+}
+
+/**
+ * Panoyu kaydeder. Tekrarlayan görevlerden yeni kopya türediyse `true` döner;
+ * çağıran taraf (pano tuvali) o durumda görünümünü depodan yeniden kurmalıdır.
+ */
+export function saveBoard(input: BoardData): boolean {
+  const derived = spawnRecurrences(input);
+  const data = derived ?? input;
   const raw = JSON.stringify(data);
-  if (raw === cacheRaw) return;
+  if (raw === cacheRaw) return false;
   cacheRaw = raw;
   cache = data;
   try {
@@ -69,7 +120,29 @@ export function saveBoard(data: BoardData) {
   } catch {
     /* depolama dolu/erişilemez: bellekte devam */
   }
+  persistToFile(raw);
   listeners.forEach((l) => l());
+  return derived !== null;
+}
+
+/**
+ * Masaüstünde açılışta pano verisini uygulama klasöründeki board.json'dan yükler.
+ * Dosya yoksa mevcut tarayıcı önbelleğini (eski sürümler) dosyaya taşır.
+ */
+export async function hydrateBoard(): Promise<void> {
+  if (!isDesktop) return;
+  try {
+    const fromFile = await invoke<string | null>('board_load');
+    if (fromFile) {
+      JSON.parse(fromFile);
+      localStorage.setItem(KEY, fromFile);
+    } else {
+      const existing = read();
+      if (existing) await invoke('board_save', { data: existing });
+    }
+  } catch {
+    /* dosya okunamazsa önbellekle devam */
+  }
 }
 
 export function subscribeBoard(cb: () => void) {

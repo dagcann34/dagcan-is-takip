@@ -1,73 +1,105 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource/rajdhani/500.css";
+@import "@fontsource/rajdhani/600.css";
+@import "@fontsource/rajdhani/700.css";
 
 /*
- * Dağcan İş Takip — Tasarım token'ları
- * Jira Service Management + ServiceNow ITSM + Apple Enterprise hibriti.
- * Deep Obsidian / Slate dark, cam (glassmorphism) yüzeyler, yüksek kontrast.
- * Tüm renkler Tailwind sınıfı olarak da kullanılabilir: bg-navy-800, text-ink-muted, border-line …
+ * Dağcan İş Takip — "Neon Grid" cyberpunk tasarım sistemi (özgün; üçüncü taraf marka/öğe içermez).
+ * Gece zemini, neon cyan + magenta + sinyal sarısı vurgular, kesik köşeli paneller,
+ * ince ızgara ve tarama çizgisi dokusu. Metin kontrastı WCAG AA hedeflenerek seçildi.
+ * Eski token adları korunur; tüm bileşenler otomatik olarak yeni temaya geçer.
  */
 @theme {
-  --font-sans: "Inter Variable", "SF Pro Display", -apple-system, BlinkMacSystemFont,
-    "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  --font-sans: "Inter Variable", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Rajdhani", "Inter Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "SF Mono", "Cascadia Code", Consolas, monospace;
 
-  /* Zemin (Obsidian) */
-  --color-obsidian-950: #050912;
-  --color-obsidian-900: #0A0F1C;
-  --color-obsidian-800: #0E1626;
+  /* Zemin */
+  --color-obsidian-950: #030409;
+  --color-obsidian-900: #06070E;
+  --color-obsidian-800: #0B0D18;
 
-  /* Slate / Navy yüzeyler (Jira N-skalası) */
-  --color-navy-900: #091E42;
-  --color-navy-800: #172B4D;
-  --color-navy-700: #253858;
-  --color-navy-600: #344563;
-  --color-navy-500: #42526E;
+  /* Yüzeyler */
+  --color-navy-900: #090B17;
+  --color-navy-800: #0F1226;
+  --color-navy-700: #161A36;
+  --color-navy-600: #222852;
+  --color-navy-500: #2E3568;
 
-  /* Marka */
-  --color-brand: #0052CC;
-  --color-brand-hover: #0065FF;
-  --color-cyan: #00B8D9;
+  /* Neon vurgular */
+  --color-brand: #E0218A;
+  --color-brand-hover: #FF2E9A;
+  --color-cyan: #00F0FF;
+  --color-magenta: #FF2E88;
+  --color-volt: #FCEE0A;
 
   /* Semantik */
-  --color-success: #36B37E;
-  --color-warning: #FFAB00;
-  --color-danger: #FF5630;
-  --color-violet: #6554C0;
-
-  /* Durum (Kanban şeritleri) */
-  --color-status-todo: #8590A2;
-  --color-status-progress: #579DFF;
-  --color-status-blocked: #FF5630;
-  --color-status-done: #36B37E;
+  --color-success: #3CFFA0;
+  --color-warning: #FCEE0A;
+  --color-danger: #FF2E63;
+  --color-violet: #9D4EDD;
 
   /* Metin */
-  --color-ink: #E6EDF7;
-  --color-ink-muted: #9FADBC;
-  --color-ink-subtle: #738496;
+  --color-ink: #E8F7FF;
+  --color-ink-muted: #93A6CC;
+  --color-ink-subtle: #63739A;
 
   /* Çizgiler */
-  --color-line: rgb(255 255 255 / 0.08);
-  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-line: rgb(0 240 255 / 0.12);
+  --color-line-strong: rgb(0 240 255 / 0.26);
 
-  --radius-card: 12px;
-  --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 12px 40px rgb(0 0 0 / 0.38);
+  --radius-card: 4px;
+  --shadow-glass: 0 0 0 1px rgb(0 240 255 / 0.04) inset, 0 18px 50px rgb(0 0 0 / 0.55);
+  --shadow-neon: 0 0 0 1px rgb(0 240 255 / 0.55), 0 0 18px rgb(0 240 255 / 0.35);
+  --shadow-neon-magenta: 0 0 0 1px rgb(255 46 136 / 0.6), 0 0 18px rgb(255 46 136 / 0.35);
+}
+
+/* Kesik köşe (notch) maskeleri */
+@utility notch {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+@utility notch-sm {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+@utility notch-tr {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
 @utility glass {
-  background: rgb(23 43 77 / 0.55);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: linear-gradient(180deg, rgb(15 18 38 / 0.86), rgb(9 11 23 / 0.86));
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid var(--color-line);
   box-shadow: var(--shadow-glass);
 }
 
 @utility glass-strong {
-  background: rgb(14 22 38 / 0.82);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  background: linear-gradient(180deg, rgb(13 16 34 / 0.96), rgb(6 7 14 / 0.96));
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid var(--color-line-strong);
   box-shadow: var(--shadow-glass);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+}
+
+@utility neon-text {
+  color: var(--color-cyan);
+  text-shadow: 0 0 10px rgb(0 240 255 / 0.55);
+}
+
+@utility hud-label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
 }
 
 @layer base {
@@ -83,59 +115,76 @@
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     background:
-      radial-gradient(1200px 600px at 10% -10%, rgb(0 82 204 / 0.18), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, rgb(0 184 217 / 0.10), transparent 55%),
+      radial-gradient(900px 520px at 8% -8%, rgb(224 33 138 / 0.16), transparent 62%),
+      radial-gradient(900px 600px at 100% 0%, rgb(0 240 255 / 0.10), transparent 58%),
+      linear-gradient(rgb(0 240 255 / 0.035) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgb(0 240 255 / 0.035) 1px, transparent 1px) 0 0 / 40px 40px,
       var(--color-obsidian-900);
+    overflow: hidden;
+  }
+  /* Tarama çizgileri: çok hafif, etkileşimi engellemez */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    background: repeating-linear-gradient(180deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
+    mix-blend-mode: overlay;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
   }
   ::selection {
-    background: rgb(0 184 217 / 0.35);
+    background: rgb(255 46 136 / 0.45);
+    color: #fff;
   }
   :focus-visible {
-    outline: 2px solid var(--color-cyan);
+    outline: 1px solid var(--color-cyan);
     outline-offset: 2px;
+    box-shadow: 0 0 12px rgb(0 240 255 / 0.45);
   }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-navy-600);
-    border-radius: 8px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background: rgb(0 240 255 / 0.22);
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(0 240 255 / 0.45);
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) sepia(1) saturate(6) hue-rotate(140deg);
+    opacity: 0.7;
+  }
+  select option {
+    background: #0b0d18;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 }
 
-/* React Flow koyu tema eşlemesi */
-.react-flow {
-  --xy-background-color: transparent;
-  --xy-node-border-radius: 12px;
-  --xy-edge-stroke: #579DFF;
-  --xy-edge-stroke-selected: #00B8D9;
-  --xy-edge-stroke-width: 2;
-  --xy-connectionline-stroke: #00B8D9;
-  --xy-handle-background-color: #00B8D9;
-  --xy-handle-border-color: #0A0F1C;
-  --xy-controls-button-background-color: #172B4D;
-  --xy-controls-button-background-color-hover: #253858;
-  --xy-controls-button-color: #E6EDF7;
-  --xy-controls-button-border-color: rgb(255 255 255 / 0.08);
-  --xy-minimap-background-color: #0E1626;
-  --xy-minimap-mask-background-color: rgb(5 9 18 / 0.7);
-  --xy-attribution-background-color: transparent;
+/* Dışa aktarma sırasında pano sütunlarının tamamı görünür olsun */
+.board-exporting .board-col-scroll {
+  overflow: visible !important;
+  max-height: none !important;
 }
-.react-flow__node-lane {
-  pointer-events: none;
-}
-.react-flow__node-card .react-flow__handle {
-  width: 10px;
-  height: 10px;
-  opacity: 0;
-  transition: opacity 120ms ease;
-}
-.react-flow__node-card:hover .react-flow__handle,
-.react-flow__node-card.selected .react-flow__handle {
-  opacity: 1;
+.board-exporting {
+  height: auto !important;
 }
 
 @keyframes toast-in {
@@ -146,5 +195,24 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgb(0 240 255 / 0.5), 0 0 10px rgb(0 240 255 / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgb(0 240 255 / 0.8), 0 0 22px rgb(0 240 255 / 0.5);
+  }
+}
+
+@keyframes scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
   }
 }

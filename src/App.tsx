@@ -12,6 +12,7 @@ import { AiStudio } from './features/ai/AiStudio';
 import { syncNativeLanguage, useT } from './i18n';
 import { useDueReminders, useIdleTouch } from './lib/useAppEffects';
 import { isDesktop } from './lib/platform';
+import { WIDE_LAYOUT, useMediaQuery } from './lib/useMediaQuery';
 import { Toaster } from './lib/toast';
 
 const isMac = navigator.platform.toLowerCase().includes('mac');
@@ -35,7 +36,14 @@ export function App() {
     }
   });
   const [boardEditing, setBoardEditing] = useState(false);
+  const wide = useMediaQuery(WIDE_LAYOUT);
+  // Dar pencerede takvim çekmece olarak açılır ve varsayılan olarak kapalıdır.
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const toggleCalendar = (open: boolean) => {
+    if (!wide) {
+      setDrawerOpen(open);
+      return;
+    }
     setCalendarOpen(open);
     try {
       localStorage.setItem('dagcan.calendar', open ? 'on' : 'off');
@@ -44,7 +52,8 @@ export function App() {
     }
   };
   const calendarView = view === 'overview' || view === 'board';
-  const showCalendar = calendarView && calendarOpen && !(view === 'board' && boardEditing);
+  const panelOpen = wide ? calendarOpen : drawerOpen;
+  const showCalendar = calendarView && panelOpen && !(view === 'board' && boardEditing);
   const urgent = board.tasks.filter((x) => {
     const tone = dueInfo(x)?.tone;
     return tone === 'overdue' || tone === 'soon';
@@ -70,30 +79,34 @@ export function App() {
 
   return (
     <div className="flex h-full">
-      <nav className="flex w-[232px] shrink-0 flex-col border-r border-line bg-obsidian-950/60 px-3 py-5 backdrop-blur-xl">
-        <div className="mb-7 flex items-center gap-2.5 px-2">
-          <img src="/favicon.svg" alt="" className="size-8" />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold">Dağcan İş Takip</div>
-            <div className="text-[11px] text-ink-subtle">{t('app.tagline')}</div>
+      <nav className="relative flex w-[236px] shrink-0 flex-col border-r border-line bg-obsidian-950/80 px-3 py-5 backdrop-blur-xl">
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-gradient-to-b from-cyan/0 via-cyan/40 to-magenta/0" />
+        <div className="mb-8 flex items-center gap-3 px-2">
+          <img src="/favicon.svg" alt="" className="size-9 drop-shadow-[0_0_10px_rgb(0_240_255/0.55)]" />
+          <div className="min-w-0 leading-tight">
+            <div className="font-display truncate text-[17px] font-bold tracking-[0.06em] uppercase">Dağcan İş Takip</div>
+            <div lang="en" className="font-mono text-[10px] tracking-wider text-magenta/90 uppercase">{t('app.tagline')}</div>
           </div>
         </div>
+        <div className="hud-label mb-2 px-3 text-[10px]! text-ink-subtle!">// NAV</div>
         {views.map((v) => (
           <NavItem key={v.id} active={view === v.id} onClick={() => setView(v.id)} icon={<v.icon className="size-4" />} label={v.label} badge={v.badge} />
         ))}
-        <div className="mt-auto flex flex-col gap-2 rounded-xl border border-line p-3 text-[11px] leading-relaxed text-ink-subtle">
+        <div className="notch mt-auto flex flex-col gap-2 border border-line bg-navy-900/70 p-3 text-[11px] leading-relaxed text-ink-subtle">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-ink-muted">{t('app.quickTask')}</span>
-            <span>{isMac ? '⌘ ⇧ Space' : 'Ctrl ⇧ Space'}</span>
+            <span className="font-display text-[13px] font-semibold tracking-wider text-ink-muted uppercase">{t('app.quickTask')}</span>
+            <kbd className="font-mono text-cyan/80">{isMac ? '⌘⇧Space' : 'Ctrl⇧Space'}</kbd>
           </div>
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1 font-semibold text-ink-muted">
+            <span className="font-display flex items-center gap-1 text-[13px] font-semibold tracking-wider text-ink-muted uppercase">
               <Command className="size-3" /> {t('app.palette')}
             </span>
-            <span>{isMac ? '⌘ K' : 'Ctrl K'}</span>
+            <kbd className="font-mono text-cyan/80">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
           </div>
           {!isDesktop && !new URLSearchParams(location.search).has('shot') && <div className="text-warning/80">{t('app.browserPreview')}</div>}
-          <div className="text-ink-subtle/70">v{__APP_VERSION__}</div>
+          <div className="flex items-center gap-2 pt-1 font-mono text-[10px] text-ink-subtle">
+            <span className="size-1.5 animate-pulse rounded-full bg-success shadow-[0_0_6px_rgb(60_255_160)]" /> v{__APP_VERSION__} · ONLINE
+          </div>
         </div>
       </nav>
       <main className="relative min-w-0 flex-1">
@@ -102,17 +115,28 @@ export function App() {
         {view === 'vault' && <VaultView />}
         {view === 'ai' && <AiStudio />}
         {view === 'settings' && <Settings />}
-        {calendarView && !calendarOpen && (
+        {calendarView && !panelOpen && (
           <button
             onClick={() => toggleCalendar(true)}
             title={t('calendar.show')}
-            className="glass absolute top-5 right-5 z-10 grid size-10 place-items-center rounded-xl text-ink-muted hover:text-cyan"
+            className="glass notch-sm absolute right-6 bottom-6 z-20 grid size-11 place-items-center text-ink-muted hover:text-cyan hover:shadow-[0_0_14px_rgb(0_240_255/0.35)]"
           >
             <CalendarDays className="size-4" />
           </button>
         )}
       </main>
-      {showCalendar && <YearCalendar onOpenTask={openTask} onClose={() => toggleCalendar(false)} />}
+      {showCalendar && !wide && <div className="fixed inset-0 z-30 bg-obsidian-950/60 backdrop-blur-[2px]" onClick={() => setDrawerOpen(false)} />}
+      {showCalendar && (
+        <div className={wide ? 'flex' : 'fixed inset-y-0 right-0 z-40 flex shadow-[-20px_0_60px_rgb(0_0_0/0.6)]'}>
+          <YearCalendar
+            onOpenTask={(id) => {
+              setDrawerOpen(false);
+              openTask(id);
+            }}
+            onClose={() => toggleCalendar(false)}
+          />
+        </div>
+      )}
       <CommandPalette views={views} onNavigate={setView} onOpenTask={openTask} />
       <Toaster />
     </div>
@@ -123,13 +147,19 @@ function NavItem({ active, onClick, icon, label, badge }: { active: boolean; onC
   return (
     <button
       onClick={onClick}
-      className={`mb-0.5 flex h-9 items-center gap-3 rounded-lg px-3 text-sm transition-colors ${
-        active ? 'bg-brand/20 text-ink shadow-[inset_2px_0_0_var(--color-cyan)]' : 'text-ink-muted hover:bg-white/5 hover:text-ink'
+      aria-current={active ? 'page' : undefined}
+      className={`font-display relative mb-1 flex h-10 items-center gap-3 px-3 text-[15px] font-semibold tracking-[0.08em] uppercase transition-all ${
+        active
+          ? 'notch-sm bg-gradient-to-r from-cyan/15 to-transparent text-cyan [text-shadow:0_0_10px_rgb(0_240_255/0.6)]'
+          : 'text-ink-muted hover:bg-cyan/5 hover:text-ink'
       }`}
     >
+      {active && <span className="absolute inset-y-1 left-0 w-[3px] bg-magenta shadow-[0_0_10px_rgb(255_46_136/0.9)]" />}
       {icon}
-      <span className="flex-1 text-left">{label}</span>
-      {!!badge && <span className="rounded-full bg-danger/20 px-1.5 text-[11px] font-semibold text-danger tabular-nums">{badge}</span>}
+      <span className="flex-1 truncate text-left">{label}</span>
+      {!!badge && (
+        <span className="notch-sm bg-danger px-1.5 font-mono text-[11px] leading-5 font-bold text-white shadow-[0_0_10px_rgb(255_46_99/0.6)]">{badge}</span>
+      )}
     </button>
   );
 }

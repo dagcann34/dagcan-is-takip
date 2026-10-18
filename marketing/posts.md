@@ -1,4 +1,4 @@
-# Paylaşım Kiti / Launch Kit — Dağcan İş Takip v0.2.0
+# Paylaşım Kiti / Launch Kit — Dağcan İş Takip v0.5.0
 
 Görseller `marketing/images/` klasöründe. Görselleri yeniden üretmek için: `bash marketing/render.sh`.
 Images live in `marketing/images/`. Regenerate with `bash marketing/render.sh`.
@@ -43,8 +43,8 @@ Hepsini tek bir masaüstü uygulamasında topladım: Dağcan İş Takip 🧵
 
 ```
 2/ ▦ Pano
-Kartları Yapılacak → Devam Ediyor → Engellendi → Tamamlandı arasında sürükle, bağımlılık okları çiz.
-Kontrol listesi, süre takibi, son tarih rozetleri ve tüm panoyu tek tıkla PNG / SVG / PDF olarak dışa aktarma.
+Ekrana tam oturan sabit Kanban: Yapılacak → Devam Ediyor → Engellendi → Tamamlandı.
+Yıllık takvim, tekrarlayan görevler, şablonlar, kontrol listesi, süre takibi ve tek tıkla PNG / SVG / PDF.
 [görsel: x-overview-tr.png]
 ```
 
@@ -102,8 +102,8 @@ So I put all of it into one desktop app: Dağcan İş Takip 🧵
 
 ```
 2/ ▦ Board
-Drag cards across To Do → In Progress → Blocked → Done and draw dependency arrows.
-Checklists, time tracking, due-date badges, and one-click PNG / SVG / PDF export of the whole board.
+A fixed Kanban that fits the screen: To Do → In Progress → Blocked → Done.
+Year calendar, recurring tasks, templates, checklists, time tracking and one-click PNG / SVG / PDF export.
 [image: x-overview-en.png]
 ```
 
@@ -141,8 +141,8 @@ Altyapı işlerimi tek bir yerde toplamak için kendi uygulamamı yazdım ve üc
 
 Bir sistem yöneticisinin günü birçok araç arasında bölünüyor: görevler bir yerde, sunucu şifreleri başka yerde, PowerShell betikleri masaüstünde, haftalık durum e-postası ise son dakikaya kalıyor. Bu dağınıklığı çözmek için Dağcan İş Takip'i geliştirdim.
 
-🔹 Kanban pano ve beyaz tahta
-Kartları sürükle bırak, bağımlılıkları oklarla göster; kontrol listesi, süre takibi ve son tarih uyarıları. Panonun tamamı PNG, SVG veya PDF olarak tek tıkla dışa aktarılıyor; tek bir kartı görsel olarak yöneticine iletebiliyorsun.
+🔹 Neon cyberpunk Kanban pano
+Ekrana tam oturan sabit sütunlar, yıllık takvim, tekrarlayan görevler ve hazır şablonlar (yama, sertifika, yedek testi…); kontrol listesi, süre takibi ve son tarih uyarıları. Panonun tamamı PNG, SVG veya PDF olarak tek tıkla dışa aktarılıyor; tek bir kartı görsel olarak yöneticine iletebiliyorsun.
 
 🔹 Sıfır bilgi şifreli kasa
 Parolalar, sunucu bilgileri, PowerShell betikleri ve API anahtarları cihazda Argon2id + AES-256-GCM ile şifreleniyor. Ana parola hiçbir yere gönderilmiyor; uygulama boşta kalınca kilitleniyor ve kopyalanan şifre 30 saniye sonra panodan siliniyor.
@@ -176,8 +176,8 @@ I built my own app to bring my infrastructure work into one place, and I'm shari
 
 A sysadmin's day is split across too many tools: tasks in one place, server passwords in another, PowerShell scripts on the desktop, and the weekly status email always left for the last minute. Dağcan İş Takip is my answer to that.
 
-🔹 Kanban board & whiteboard
-Drag-and-drop cards, dependency arrows, checklists, time tracking and due-date alerts. Export the whole board as PNG, SVG or PDF in one click, or share a single card as an image with your manager.
+🔹 Neon cyberpunk Kanban board
+Fixed columns that fit the screen, a year calendar, recurring tasks and ready templates (patching, certificates, backup tests…); checklists, time tracking and due-date alerts. Export the whole board as PNG, SVG or PDF in one click, or share a single card as an image with your manager.
 
 🔹 Zero-knowledge encrypted vault
 Passwords, server details, PowerShell scripts and API keys are encrypted on-device with Argon2id + AES-256-GCM. The master password never leaves your machine; the app auto-locks when idle and copied secrets are wiped from the clipboard after 30 seconds.

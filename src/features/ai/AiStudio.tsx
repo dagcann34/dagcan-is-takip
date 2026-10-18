@@ -108,12 +108,12 @@ export function AiStudio() {
       <PageHeader title={t('ai.title')} subtitle={t('ai.subtitle')} />
       <div className="grid min-h-0 flex-1 grid-cols-[440px_1fr] gap-5 px-8 pb-8">
         <Panel className="flex flex-col gap-4 overflow-auto p-5">
-          <div className="grid grid-cols-2 gap-1 rounded-xl bg-obsidian-950/60 p-1">
+          <div className="grid grid-cols-2 gap-1 notch-sm bg-obsidian-950/60 p-1">
             {MODES.map(({ id, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => setMode(id)}
-                className={`flex h-9 items-center justify-center gap-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex h-9 items-center justify-center gap-2 text-sm font-medium transition-colors ${
                   mode === id ? 'bg-navy-700 text-ink shadow' : 'text-ink-muted hover:text-ink'
                 }`}
               >
@@ -131,10 +131,10 @@ export function AiStudio() {
                 </label>
               )}
             </div>
-            <ul className="max-h-52 space-y-1 overflow-auto rounded-xl border border-line p-1">
+            <ul className="max-h-52 space-y-1 overflow-auto notch-sm border border-line p-1">
               {candidates.map((x) => (
                 <li key={x.id}>
-                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2.5 py-2 hover:bg-white/5">
+                  <label className="flex cursor-pointer items-start gap-3 px-2.5 py-2 hover:bg-white/5">
                     <input type="checkbox" className="mt-1" checked={picked.has(x.id)} onChange={() => toggle(x.id)} />
                     <span className="min-w-0">
                       <span className="block truncate text-sm">
@@ -205,7 +205,7 @@ export function AiStudio() {
             </>
           )}
 
-          <label className="flex items-start gap-2 rounded-lg border border-line bg-obsidian-950/40 p-3 text-xs text-ink-muted">
+          <label className="flex items-start gap-2 border border-line bg-obsidian-950/40 p-3 text-xs text-ink-muted">
             <input type="checkbox" className="mt-0.5" checked={redact} onChange={(e) => setRedact(e.target.checked)} />
             <span>{t('ai.redact')}</span>
           </label>

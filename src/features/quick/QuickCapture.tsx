@@ -34,7 +34,7 @@ export function QuickCapture() {
   }
 
   return (
-    <form onSubmit={submit} className="flex h-full flex-col gap-3 bg-obsidian-900 p-4" data-tauri-drag-region>
+    <form onSubmit={submit} className="flex h-full flex-col gap-3 border border-cyan/40 bg-obsidian-900 p-4 shadow-[inset_0_0_30px_rgb(0_240_255/0.08)]" data-tauri-drag-region>
       <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-ink-muted uppercase" data-tauri-drag-region>
         <Zap className="size-3.5 text-cyan" /> {t('app.quickTask')}
       </div>
@@ -44,7 +44,7 @@ export function QuickCapture() {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder={t('quick.placeholder')}
-        className="h-12 rounded-xl border border-line-strong bg-navy-800 px-4 text-base outline-none placeholder:text-ink-subtle focus:border-cyan/60"
+        className="h-12 notch-sm border border-line-strong bg-navy-800 px-4 text-base outline-none placeholder:text-ink-subtle focus:border-cyan/60"
       />
       <div className="flex items-center gap-2">
         {(Object.keys(PRIORITY) as Priority[]).map((p) => (
@@ -52,7 +52,7 @@ export function QuickCapture() {
             type="button"
             key={p}
             onClick={() => setPriority(p)}
-            className={`h-8 rounded-lg px-3 text-xs font-medium transition-colors ${priority === p ? 'bg-white/10 text-ink' : 'text-ink-muted hover:bg-white/5'}`}
+            className={`h-8 px-3 text-xs font-medium transition-colors ${priority === p ? 'bg-white/10 text-ink' : 'text-ink-muted hover:bg-white/5'}`}
             style={priority === p ? { boxShadow: `inset 0 0 0 1px ${PRIORITY[p].color}` } : undefined}
           >
             {priorityLabel(p)}
@@ -62,9 +62,9 @@ export function QuickCapture() {
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
-          className="ml-auto h-8 rounded-lg border border-line bg-navy-800 px-2 text-xs text-ink-muted"
+          className="ml-auto h-8 border border-line bg-navy-800 px-2 text-xs text-ink-muted"
         />
-        <button type="submit" className="flex h-8 items-center gap-1.5 rounded-lg bg-brand px-3 text-xs font-medium text-white hover:bg-brand-hover">
+        <button type="submit" className="flex h-8 items-center gap-1.5 bg-volt px-3 font-display text-sm font-bold uppercase text-obsidian-950 hover:bg-[#fff35a]">
           {t('common.add')} <CornerDownLeft className="size-3.5" />
         </button>
       </div>

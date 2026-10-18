@@ -1,5 +1,7 @@
 export type Status = 'todo' | 'inprogress' | 'blocked' | 'done';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
+export type Recurrence = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export const RECURRENCES: Recurrence[] = ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'];
 
 import { t } from '../../i18n';
 import type { MessageKey } from '../../i18n';
@@ -28,6 +30,10 @@ export interface Task {
   timeSpentMs?: number;
   /** Çalışan zamanlayıcının başlangıcı (epoch ms). */
   timerStartedAt?: number;
+  /** Tamamlanınca bir sonraki kopyanın oluşturulacağı periyot. */
+  recurrence?: Recurrence;
+  /** Bu kopyadan sonraki tekrar oluşturulduysa true (iki kez oluşmasın). */
+  recurrenceSpawned?: boolean;
   x: number;
   y: number;
 }
@@ -45,10 +51,10 @@ export interface BoardData {
 }
 
 export const LANES: { status: Status; color: string }[] = [
-  { status: 'todo', color: '#8590A2' },
-  { status: 'inprogress', color: '#579DFF' },
-  { status: 'blocked', color: '#FF5630' },
-  { status: 'done', color: '#36B37E' },
+  { status: 'todo', color: '#8A97C8' },
+  { status: 'inprogress', color: '#00F0FF' },
+  { status: 'blocked', color: '#FF2E63' },
+  { status: 'done', color: '#3CFFA0' },
 ];
 
 export const statusLabel = (s: Status) => t(`status.${s}` as MessageKey);
@@ -68,11 +74,11 @@ export function laneIndexForX(x: number): number {
   return Math.max(0, Math.min(LANES.length - 1, Math.floor(center / (LANE_WIDTH + LANE_GAP))));
 }
 
-export const PRIORITY: Record<Priority, { color: string }> = {
-  low: { color: '#579DFF' },
-  medium: { color: '#FFAB00' },
-  high: { color: '#FF7452' },
-  critical: { color: '#FF5630' },
+export const PRIORITY: Record<Priority, { color: string; rank: number }> = {
+  low: { color: '#00F0FF', rank: 0 },
+  medium: { color: '#FCEE0A', rank: 1 },
+  high: { color: '#FF9F1C', rank: 2 },
+  critical: { color: '#FF2E63', rank: 3 },
 };
 
 export function dueInfo(task: Pick<Task, 'dueDate' | 'status'>): { label: string; tone: 'overdue' | 'soon' | 'normal' } | null {
@@ -99,4 +105,22 @@ export function formatDuration(ms: number): string {
   const m = totalMin % 60;
   if (h === 0) return `${m}m`;
   return `${h}h ${String(m).padStart(2, '0')}m`;
+}
+
+export const recurrenceLabel = (r: Recurrence) => t(`recurrence.${r}` as MessageKey);
+
+/** YYYY-MM-DD tarihini periyot kadar ileri taşır (ay sonu taşmalarını son güne sabitler). */
+export function shiftDate(iso: string, r: Recurrence): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  if (r === 'daily') date.setDate(date.getDate() + 1);
+  else if (r === 'weekly') date.setDate(date.getDate() + 7);
+  else {
+    const months = r === 'monthly' ? 1 : r === 'quarterly' ? 3 : 12;
+    const target = new Date(y, m - 1 + months, 1);
+    const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+    target.setDate(Math.min(d, lastDay));
+    return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
+  }
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

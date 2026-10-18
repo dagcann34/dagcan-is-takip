@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight, PanelRightClose } from 'lucide-react';
+import { CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, PanelRightClose } from 'lucide-react';
+import { saveFile } from '../../lib/platform';
+import { errorMessage, toast } from '../../lib/toast';
+import { buildIcs } from './ics';
 import { useT } from '../../i18n';
 import { useBoard } from '../board/boardStore';
 import { PRIORITY, type Task } from '../board/types';
@@ -65,21 +68,35 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
     <aside className="flex w-[318px] shrink-0 flex-col border-l border-line bg-obsidian-950/50 backdrop-blur-xl select-none" draggable={false}>
       <header className="flex items-center gap-2 border-b border-line px-4 py-3.5">
         <CalendarDays className="size-4 text-cyan" />
-        <span className="flex-1 text-sm font-semibold">{t('calendar.title')}</span>
-        <button className="grid size-7 place-items-center rounded-md text-ink-subtle hover:bg-white/10 hover:text-ink" onClick={onClose} title={t('calendar.hide')}>
+        <span className="font-display flex-1 text-[15px] font-bold tracking-[0.1em] uppercase">{t('calendar.title')}</span>
+        <button
+          className="grid size-7 place-items-center text-ink-subtle hover:bg-white/10 hover:text-ink"
+          title={t('calendar.exportIcs')}
+          onClick={async () => {
+            try {
+              const path = await saveFile('dagcan-is-takip.ics', new TextEncoder().encode(buildIcs(tasks)), 'text/calendar');
+              toast(t('calendar.icsExported', { path }));
+            } catch (e) {
+              toast(errorMessage(e), 'error');
+            }
+          }}
+        >
+          <CalendarPlus className="size-4" />
+        </button>
+        <button className="grid size-7 place-items-center text-ink-subtle hover:bg-white/10 hover:text-ink" onClick={onClose} title={t('calendar.hide')}>
           <PanelRightClose className="size-4" />
         </button>
       </header>
 
       <div className="flex items-center justify-between px-4 pt-3">
-        <button className="grid size-7 place-items-center rounded-md text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y - 1)} aria-label="‹">
+        <button className="grid size-7 place-items-center text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y - 1)} aria-label="‹">
           <ChevronLeft className="size-4" />
         </button>
         <div className="text-center">
-          <div className="text-xl font-semibold tracking-tight tabular-nums">{year}</div>
+          <div className="font-display neon-text text-2xl font-bold tracking-[0.12em] tabular-nums">{year}</div>
           <div className="text-[11px] text-ink-subtle">{t('calendar.yearStats', { due: yearDue, done: yearDone })}</div>
         </div>
-        <button className="grid size-7 place-items-center rounded-md text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y + 1)} aria-label="›">
+        <button className="grid size-7 place-items-center text-ink-muted hover:bg-white/10" onClick={() => setYear((y) => y + 1)} aria-label="›">
           <ChevronRight className="size-4" />
         </button>
       </div>
@@ -129,7 +146,7 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
                       (best, x) => (!best || ['low', 'medium', 'high', 'critical'].indexOf(x.priority) > ['low', 'medium', 'high', 'critical'].indexOf(best.priority) ? x : best),
                       null,
                     );
-                    const dot = overdue ? '#FF5630' : topPriority ? PRIORITY[topPriority.priority].color : info?.done.length ? '#36B37E' : null;
+                    const dot = overdue ? '#FF2E63' : topPriority ? PRIORITY[topPriority.priority].color : info?.done.length ? '#3CFFA0' : null;
                     return (
                       <button
                         key={key}
@@ -143,7 +160,7 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
                             : isToday
                               ? 'text-cyan ring-1 ring-cyan'
                               : holiday
-                                ? 'bg-danger/15 text-[#FF8F73]'
+                                ? 'bg-magenta/15 text-magenta'
                                 : weekend
                                   ? 'text-ink-subtle hover:bg-white/10'
                                   : 'text-ink-muted hover:bg-white/10'
@@ -161,9 +178,9 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
         </div>
 
         <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 px-1 text-[10px] text-ink-subtle">
-          <Legend color="#579DFF" label={t('calendar.legendDue')} />
-          <Legend color="#FF5630" label={t('calendar.legendOverdue')} />
-          <Legend color="#36B37E" label={t('calendar.legendDone')} />
+          <Legend color="#FCEE0A" label={t('calendar.legendDue')} />
+          <Legend color="#FF2E63" label={t('calendar.legendOverdue')} />
+          <Legend color="#3CFFA0" label={t('calendar.legendDone')} />
           <span className="flex items-center gap-1">
             <span className="size-2 rounded-[2px] bg-danger/30" /> {t('calendar.legendHoliday')}
           </span>
@@ -175,14 +192,14 @@ export function YearCalendar({ onOpenTask, onClose }: { onOpenTask: (id: string)
           <div className="mb-2 text-xs font-semibold text-ink-muted">
             {new Date(`${selected}T00:00:00`).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
-          {selHoliday && <div className="mb-2 rounded-md bg-danger/10 px-2 py-1 text-xs text-[#FF8F73]">🇹🇷 {selHoliday[lang]}</div>}
+          {selHoliday && <div className="mb-2 bg-danger/10 px-2 py-1 text-xs text-magenta">🇹🇷 {selHoliday[lang]}</div>}
           {!sel?.due.length && !sel?.done.length && <p className="text-xs text-ink-subtle">{t('calendar.noTasks')}</p>}
           <ul className="flex flex-col gap-1">
             {sel?.due.map((x) => (
-              <TaskRow key={x.id} task={x} tag={t('calendar.due')} color={selected < today ? '#FF5630' : PRIORITY[x.priority].color} onOpen={onOpenTask} />
+              <TaskRow key={x.id} task={x} tag={t('calendar.due')} color={selected < today ? '#FF2E63' : PRIORITY[x.priority].color} onOpen={onOpenTask} />
             ))}
             {sel?.done.map((x) => (
-              <TaskRow key={x.id} task={x} tag={t('calendar.done')} color="#36B37E" onOpen={onOpenTask} />
+              <TaskRow key={x.id} task={x} tag={t('calendar.done')} color="#3CFFA0" onOpen={onOpenTask} />
             ))}
           </ul>
         </div>
@@ -202,7 +219,7 @@ function Legend({ color, label }: { color: string; label: string }) {
 function TaskRow({ task, tag, color, onOpen }: { task: Task; tag: string; color: string; onOpen: (id: string) => void }) {
   return (
     <li>
-      <button onClick={() => onOpen(task.id)} className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left hover:bg-white/5">
+      <button onClick={() => onOpen(task.id)} className="flex w-full items-center gap-2 px-1.5 py-1 text-left hover:bg-white/5">
         <span className="h-4 w-0.5 shrink-0 rounded-full" style={{ background: color }} />
         <span className="min-w-0 flex-1 truncate text-xs">
           <span className="text-ink-subtle">{task.key}</span> {task.title}

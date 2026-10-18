@@ -4,7 +4,7 @@
 
 <h1 align="center">Dağcan İş Takip</h1>
 <p align="center"><b>BT altyapı ekipleri için kurumsal iş ve güvenlik merkezi</b><br/>
-Kanban beyaz tahta · sıfır bilgi kasa · AI raporlama · Windows ve macOS</p>
+Neon cyberpunk Kanban · sıfır bilgi kasa · AI raporlama · Windows ve macOS</p>
 
 <p align="center">
   <a href="README.md">🇬🇧 English</a> ·
@@ -32,8 +32,10 @@ Sistem yöneticileri iş kayıtlarını, PowerShell betiklerini, sunucu parolala
 |---|---|
 | **Yıllık takvim** | Sağda sabit panel: 12 ay, teslim ve tamamlanma günleri, gecikmeler ve resmi tatiller; güne tıklayınca görevleri listelenir |
 | **Genel Bakış paneli** | Açık, gecikmiş, bu hafta teslim, son 7 günde biten, engellenen iş ve takip edilen süre göstergeleri; durum dağılımı; yaklaşan teslimler |
-| **Kanban + beyaz tahta** | Kartları Yapılacak / Devam Ediyor / Engellendi / Tamamlandı arasında sürükle, bağımlılık okları çiz, mini harita, öncelik ve son tarih rozetleri |
+| **Sabit Kanban pano** | Pencereye her zaman tam oturan dört sütun; kazara sürükleme yok. Kartlar ◀ ▶ veya `Alt + ←/→` ile taşınır; bağımlılık, öncelik ve son tarih rozetleri |
 | **Dışa aktarma ve paylaşım** | Panonun tamamını yüksek çözünürlüklü PNG, vektörel SVG veya PDF olarak; tek bir kartı görsel olarak (kaydedilir + panoya kopyalanır) |
+| **Tekrarlayan görevler ve şablonlar** | Günlükten yıllığa kadar, tamamlanınca kendini yeniden oluşturan görevler; yama, sertifika yenileme, yedek testi, işe giriş/çıkış ve yetki gözden geçirme şablonları |
+| **Filtre ve takvime aktarma** | Panoda arama/öncelik filtresi; teslim tarihlerini .ics olarak Apple Takvim / Outlook'a aktarma |
 | **Kontrol listesi ve süre takibi** | İlerleme çubuklu alt adımlar, görev başına başlat/durdur zamanlayıcı |
 | **Sıfır bilgi kasa** | Parola, sunucu, PowerShell betiği, not ve API anahtarları Rust tarafında Argon2id + AES-256-GCM ile şifrelenir |
 | **Otomatik kilit ve pano temizleme** | Hareketsizlikte (1–30 dk) veya arka planda 60 sn sonra kilitlenir; kopyalanan gizli değer 30 sn sonra silinir |

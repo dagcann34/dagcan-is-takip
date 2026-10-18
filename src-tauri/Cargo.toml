@@ -1,6 +1,6 @@
 [package]
 name = "dagcan-is-takip"
-version = "0.3.0"
+version = "0.5.0"
 description = "Dağcan İş Takip — Enterprise Task & Security Hub"
 edition = "2021"
 
@@ -17,6 +17,7 @@ tauri-plugin-clipboard-manager = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-opener = "2"
+tauri-plugin-autostart = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

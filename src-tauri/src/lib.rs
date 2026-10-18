@@ -122,12 +122,40 @@ fn save_export(app: AppHandle, file_name: String, base64: String) -> Result<Stri
     Ok(target.to_string_lossy().into_owned())
 }
 
+fn board_path(app: &AppHandle) -> Result<std::path::PathBuf, String> {
+    Ok(app.path().app_data_dir().map_err(|e| e.to_string())?.join("board.json"))
+}
+
+/// Pano verisini uygulama veri klasöründen okur (yoksa None). Pano hassas veri içermez; sırlar kasadadır.
+#[tauri::command]
+fn board_load(app: AppHandle) -> Result<Option<String>, String> {
+    let path = board_path(&app)?;
+    if !path.exists() {
+        return Ok(None);
+    }
+    fs::read_to_string(path).map(Some).map_err(|e| format!("err.export.write::{e}"))
+}
+
+/// Pano verisini atomik olarak yazar.
+#[tauri::command]
+fn board_save(app: AppHandle, data: String) -> Result<(), String> {
+    serde_json::from_str::<serde_json::Value>(&data).map_err(|e| format!("err.vault.corrupt::{e}"))?;
+    let path = board_path(&app)?;
+    let tmp = path.with_extension("json.tmp");
+    fs::write(&tmp, data).map_err(|e| format!("err.export.write::{e}"))?;
+    fs::rename(&tmp, &path).map_err(|e| format!("err.export.write::{e}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec!["--minimized"]),
+        ))
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, _shortcut, event| {
@@ -143,6 +171,12 @@ pub fn run() {
             app.manage(VaultState::new(data_dir.join("vault.dgv")));
             vault::spawn_auto_lock(app.handle().clone());
             build_tray(app.handle())?;
+            // Girişte otomatik başlatıldıysa yalnızca tepside/menü çubuğunda başla.
+            if std::env::args().any(|a| a == "--minimized") {
+                if let Some(w) = app.get_webview_window("main") {
+                    let _ = w.hide();
+                }
+            }
             if let Err(e) = app.global_shortcut().register(quick_shortcut()) {
                 eprintln!("Kısayol kaydedilemedi (başka uygulama kullanıyor olabilir): {e}");
             }
@@ -166,6 +200,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_export,
             set_tray_labels,
+            board_load,
+            board_save,
             vault::vault_export_backup,
             vault::vault_status,
             vault::vault_init,

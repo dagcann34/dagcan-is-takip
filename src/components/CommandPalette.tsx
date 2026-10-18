@@ -94,7 +94,7 @@ export function CommandPalette({
 
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-center bg-obsidian-950/60 pt-[14vh] backdrop-blur-sm" onClick={() => setOpen(false)}>
-      <div className="glass-strong w-[620px] overflow-hidden rounded-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="glass-strong w-[620px] overflow-hidden notch" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-line px-4">
           <Search className="size-4 text-ink-subtle" />
           <input
@@ -118,7 +118,7 @@ export function CommandPalette({
             placeholder={t('palette.placeholder')}
             className="h-14 flex-1 bg-transparent text-base outline-none placeholder:text-ink-subtle"
           />
-          <span className="flex items-center gap-1 rounded-md border border-line px-1.5 py-0.5 text-[11px] text-ink-subtle">
+          <span className="flex items-center gap-1 border border-line px-1.5 py-0.5 text-[11px] text-ink-subtle">
             <Command className="size-3" />K
           </span>
         </div>
@@ -136,7 +136,7 @@ export function CommandPalette({
                 <button
                   onMouseEnter={() => setActive(idx)}
                   onClick={() => run(i)}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${idx === active ? 'bg-brand/25 text-ink' : 'text-ink-muted'}`}
+                  className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm ${idx === active ? 'bg-brand/25 text-ink' : 'text-ink-muted'}`}
                 >
                   <Icon className="size-4 shrink-0" />
                   <span className="flex-1 truncate">{i.label}</span>
